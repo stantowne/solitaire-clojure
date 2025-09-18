@@ -1,18 +1,11 @@
 (ns solitaire-clojure.print)
 
-(def suit-symbol
-  {:hearts "Hrt"
-   :diamonds "Dia"
-   :clubs "Clb"
-   :spades "Spd"})
-
 (defn suit-str
-  "1-character string representation of a card suit, color hearts and diamonds red."
+  "suit number as string in color"
   [suit]
-  (let [symbol (get suit-symbol suit "?")]
-    (if (#{:hearts :diamonds} suit)
-      (str "\u001b[31m" symbol "\u001b[0m")
-      (str "\u001b[36m" symbol "\u001b[0m"))))
+  (if (even? suit))
+    (str "\u001b[31m-" str(suit) "\u001b[0m")  ;red -- hearts 0 and diamonds 2
+    (str "\u001b[36m-" str(suit) "\u001b[0m")) ;blue -- (for black) spades 1 and clubs 3
 
 (defn value-str
   "1 character string representation of a card value."
