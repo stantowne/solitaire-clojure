@@ -1,1 +1,0 @@
-(ns solitaire-clojure.newFile)
