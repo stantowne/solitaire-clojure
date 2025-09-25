@@ -147,4 +147,4 @@
                     (let [new-from-pile (force-last-card-pile-face-up (vec (butlast from-pile)))
                           new-to-pile (vec (conj to-pile from-pile-last-card))
                           new-tableau (-> (:tableau (:field game-state))
-                                          (assoc from-pile-num
+                                          (assoc from-pile-num new-from-pile))]))))))))))))

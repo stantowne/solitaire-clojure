@@ -116,5 +116,5 @@
   []
   (let [game-state (shuffle-and-deal unshuffled-deck)]
     (print-game-state game-state)
-    (print-game-state (flip game-state))
-    (print-game-state (flip (flip game-state)))))
+    (let [result (play-game game-state)]
+      (println "Game result:" result))))))
