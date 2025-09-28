@@ -34,7 +34,7 @@
                                [(nth sd 30) (nth sd 36) (nth sd 41) (nth sd 45) (nth sd 48) (nth sd 50) (force-card-face-up (nth sd 51))]]
                        :foundations [0 0 0 0]}
                    :moves-made 0
-                   :seen-fields #{}}]
+                   :seen-fields []}]
   game-state))
 ;; The result of this function is a map with three keys: :field, :moves-made, and :seen-fields
 ;; :field is itself a map with four keys: :stock, :waste, :tableau, and :foundations
@@ -56,8 +56,10 @@
         {:result :won}
       (= (:moves-made game-state) 200)
         {:result :lost-limit-reached}
-      (contains? (:seen-fields game-state) (:field game-state))
-        {:result :lost-field-repeated}
+      (some #(= % (:field game-state)) (:seen-fields game-state))
+        (let [idx-pair (some #(when (= (second %) (:field game-state)) %) (map-indexed vector (:seen-fields game-state)))]
+          (when idx-pair
+            {:result :lost-field-repeated :index (first idx-pair)}))
       :else
          (let [new-seen-fields (conj (:seen-fields game-state) (:field game-state))
                game-state (assoc game-state :seen-fields new-seen-fields)]
