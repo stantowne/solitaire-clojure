@@ -50,7 +50,8 @@
 (defn play-game
   ([game-state]
    (loop [game-state game-state]
-     (print-game-state game-state)
+     (if (> (:moves-made game-state) 0)  ;; because the initial state is printed in core.clj -main
+       (print-game-state game-state))
      (cond
       (= (reduce + (:foundations (:field game-state))) 52)
         {:result :won}

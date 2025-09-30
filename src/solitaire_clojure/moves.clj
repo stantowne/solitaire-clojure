@@ -160,7 +160,7 @@
                               ;; empty to pile & first face up card in from pile is not a king
                               (empty? to-pile)
                               (do
-                                (println "fpdp-second condition satisfied")
+                                ;; (println "fpdp-second condition satisfied")
                                  nil)
 
                               ;; non-empty to-pile (regular case)
