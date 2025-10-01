@@ -10,32 +10,73 @@
                      move-full-pile-to-different-pile
                      ;;move-partial-pile-to-different-pile
                      move-a-card-from-waste-to-pile
-                     flip]]))
+                     flip]])
+  (:require [clojure.data.csv :as csv]
+            [clojure.java.io :as io]
+            [solitaire-clojure.helper-functions :refer [force-card-face-up]]))
 
-;; Creates an unshuffled deck of cards
-(def unshuffled-deck
-  (vec (for [s (range 4) ; hearts 0, spades 1, diamonds 2, clubs 3
-             v (range 1 14)]
-         {:suit s :value v :face-up false})))
+(defonce csv-reader-atom (atom nil))
 
-(defn shuffle-and-deal
-  "Returns a map with three first level keys -- :field, :moves-made, and :seen-fields. Shuffles the deck and then deals it out to initial condition"
-  [deck]
-  (let [sd (vec (shuffle deck))
-        game-state {:field
-                      {:stock (subvec sd 0 24)
-                       :waste []
-                       :tableau [[(force-card-face-up (nth sd 24))]
-                               [(nth sd 25) (force-card-face-up (nth sd 31))]
-                               [(nth sd 26) (nth sd 32) (force-card-face-up (nth sd 37))]
-                               [(nth sd 27) (nth sd 33) (nth sd 38) (force-card-face-up (nth sd 42))]
-                               [(nth sd 28) (nth sd 34) (nth sd 39) (nth sd 43) (force-card-face-up (nth sd 46))]
-                               [(nth sd 29) (nth sd 35) (nth sd 40) (nth sd 44) (nth sd 47) (force-card-face-up (nth sd 49))]
-                               [(nth sd 30) (nth sd 36) (nth sd 41) (nth sd 45) (nth sd 48) (nth sd 50) (force-card-face-up (nth sd 51))]]
+(defn init-csv-reader [filepath] ;; "resources/decks-made-2022-01=15-count-10000-dict.csv"
+  (reset! csv-reader-atom (csv/read-csv (io/reader filepath))))
+
+(defn next-deck-from-csv []
+  (when-let [lines @csv-reader-atom]
+    (when (seq lines)
+      (let [line (first lines)
+            _ (swap! csv-reader-atom rest)
+            deck (vec
+                   (for [i (range 0 104 2)]
+                     {:value (Integer/parseInt (nth line i))
+                      :suit (Integer/parseInt (nth line (inc i)))
+                      :face-up false}))]
+        deck))))
+
+(defn deal-next-deck []
+  (let [deck (next-deck-from-csv)]
+    (when deck
+      (let [sd deck
+            game-state {:field
+                        {:stock (subvec sd 0 24)
+                         :waste []
+                         :tableau [[(force-card-face-up (nth sd 24))]
+                                   [(nth sd 25) (force-card-face-up (nth sd 31))]
+                                   [(nth sd 26) (nth sd 32) (force-card-face-up (nth sd 37))]
+                                   [(nth sd 27) (nth sd 33) (nth sd 38) (force-card-face-up (nth sd 42))]
+                                   [(nth sd 28) (nth sd 34) (nth sd 39) (nth sd 43) (force-card-face-up (nth sd 46))]
+                                   [(nth sd 29) (nth sd 35) (nth sd 40) (nth sd 44) (nth sd 47) (force-card-face-up (nth sd 49))]
+                                   [(nth sd 30) (nth sd 36) (nth sd 41) (nth sd 45) (nth sd 48) (nth sd 50) (force-card-face-up (nth sd 51))]]
+                         :foundations [0 0 0 0]}
+                        :moves-made 0
+                        :seen-fields []}]
+        game-state))))
+
+(comment
+  ;; Creates an unshuffled deck of cards
+  (def unshuffled-deck
+    (vec (for [s (range 4) ; hearts 0, spades 1, diamonds 2, clubs 3
+               v (range 1 14)]
+           {:suit s :value v :face-up false})))
+
+  (defn shuffle-and-deal
+    "Returns a map with three first level keys -- :field, :moves-made, and :seen-fields. Shuffles the deck and then deals it out to initial condition"
+    [deck]
+    (let [sd (vec (shuffle deck))
+          game-state {:field
+                      {:stock       (subvec sd 0 24)
+                       :waste       []
+                       :tableau     [[(force-card-face-up (nth sd 24))]
+                                     [(nth sd 25) (force-card-face-up (nth sd 31))]
+                                     [(nth sd 26) (nth sd 32) (force-card-face-up (nth sd 37))]
+                                     [(nth sd 27) (nth sd 33) (nth sd 38) (force-card-face-up (nth sd 42))]
+                                     [(nth sd 28) (nth sd 34) (nth sd 39) (nth sd 43) (force-card-face-up (nth sd 46))]
+                                     [(nth sd 29) (nth sd 35) (nth sd 40) (nth sd 44) (nth sd 47) (force-card-face-up (nth sd 49))]
+                                     [(nth sd 30) (nth sd 36) (nth sd 41) (nth sd 45) (nth sd 48) (nth sd 50) (force-card-face-up (nth sd 51))]]
                        :foundations [0 0 0 0]}
-                   :moves-made 0
-                   :seen-fields []}]
-  game-state))
+                      :moves-made  0
+                      :seen-fields []}]
+      game-state))
+  )
 ;; The result of this function is a map with three keys: :field, :moves-made, and :seen-fields
 ;; :field is itself a map with four keys: :stock, :waste, :tableau, and :foundations
  ;; :stock is a vector of cards (maps with keys :suit, :value, and :face-up)
@@ -44,6 +85,8 @@
  ;; :foundations is a vector of 4 integers, each representing the last card value in each foundation pile
 ;; :moves-made is an integer, representing the number of moves made so far
 ;; :seen-fields is a set of previous fields to detect loops
+;;
+
 
 
 
@@ -98,11 +141,12 @@
 (defn -main
   "Main entry point for the Solitaire game"
   []
+  (init-csv-reader "resources/decks-made-2022-01-15-count-10000-dict.csv")
   (let [[_ final-results]
          (loop [game-number 0
                 record-of-results {:lost-limit-reached 0 :lost-field-repeated 0 :won 0}]
-          (if (< game-number 1000)
-            (let [game-state (shuffle-and-deal unshuffled-deck)
+          (if (< game-number 10000)
+            (let [game-state (deal-next-deck)
                   result (play-game game-state)
                   updated-results
                     (cond
