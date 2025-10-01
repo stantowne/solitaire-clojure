@@ -1,6 +1,6 @@
 (ns solitaire-clojure.moves
   (:require [solitaire-clojure.helper-functions
-             :refer [force-card-face-up force-last-card-pile-face-up force-card-face-down dif-color]]))
+             :refer [force-card-face-up force-last-card-pile-face-up force-card-face-down dif-color card-in-tableau-face-up]]))
 
 (defn flip
   "returns a new map with three (or fewer) cards flipped from stock to waste or the entire waste flipped to stock;
@@ -64,7 +64,7 @@
 (defn move-a-card-from-pile-to-foundations
   "returns a new map with the last card in a pile moved to the foundations in certain cases;
   otherwise return nil"
-  [game-state max-value-to-move]
+  [game-state max-value-to-auto-move]
   (some (fn [pile-num]
           (let [{:keys [field moves-made]} game-state
                 tableau (:tableau field)
@@ -75,7 +75,13 @@
                      suit-number (:suit pile-last-card)
                      value (:value pile-last-card)
                      foundation-value (foundations suit-number)]
-                  (when (and (<= value max-value-to-move) (= value (inc foundation-value)))
+                  (when (and (= value (inc foundation-value))
+                             (or
+                                (<= value max-value-to-auto-move)
+                                (and (>= (foundations (mod (+ suit-number 1) 4)) (- foundation-value 2))
+                                     (card-in-tableau-face-up tableau {:suit (mod (+ suit-number 3) 4) :value (- value 1)}))
+                                (and (>= (foundations (mod (+ suit-number 3) 4)) (- foundation-value 2))
+                                     (card-in-tableau-face-up tableau {:suit (mod (+ suit-number 1) 4) :value (- value 1)}))))
                     (let [new-foundations (update foundations suit-number inc)
                           new-pile (vec (butlast pile))
                           new-pile (if (seq new-pile)
@@ -149,7 +155,7 @@
                                    (> (count from-pile) (count from-pile-up-cards)) ;; at least one face down card in from-pile
                                )
                               (do
-                                (println "fpdp-first condition satisfied")
+                                ;; (println "fpdp-first condition satisfied")
                                 (let [new-from-pile (force-last-card-pile-face-up (vec from-pile-dn-cards))
                                     new-to-pile (vec (concat to-pile from-pile-up-cards))
                                     new-tableau (assoc tableau from-pile-num new-from-pile to-pile-num new-to-pile)
@@ -172,7 +178,7 @@
                                          (dif-color to-pile-last-card (first from-pile-up-cards))
                                          (= (:value to-pile-last-card) (inc (:value (first from-pile-up-cards)))))
                                   (do
-                                    (println "let within fpdp else satisfied")
+                                    ;; (println "let within fpdp else satisfied")
                                     (let [new-from-pile (force-last-card-pile-face-up (vec from-pile-dn-cards))
                                         new-to-pile (vec (concat to-pile from-pile-up-cards))
                                         new-tableau (assoc tableau from-pile-num new-from-pile to-pile-num new-to-pile)

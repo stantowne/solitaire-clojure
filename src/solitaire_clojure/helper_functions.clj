@@ -21,3 +21,11 @@
   "are the two cards of different colors?"
   [card1 card2]
   (not= (even? (:suit card1)) (even? (:suit card2))))
+
+
+(defn card-in-tableau-face-up
+  "accept a tableau (a vector of piles) and a card; return true if the card is face up in any pile"
+  [tableau card]
+  (some (fn [pile]
+          (some (fn [x] (and (= x card) (:face-up x))) pile)) ;; true if card is face up in this pile
+        tableau)) ;; returns true if card is face up in any pile

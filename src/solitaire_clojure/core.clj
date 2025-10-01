@@ -88,7 +88,7 @@
                                 (if-let [result (move-a-card-from-waste-to-foundations game-state 13)]
                                   (recur result)
                                   (do
-                                    (println "move-a-card-from-waste-to-foundations (13) failed")
+                                    ;; (println "move-a-card-from-waste-to-foundations (13) failed")
                                     (if-let [result (flip game-state)]
                                       (recur result)
                                       (do
