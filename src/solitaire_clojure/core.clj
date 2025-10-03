@@ -8,9 +8,10 @@
              :refer [move-a-card-from-pile-to-foundations
                      move-a-card-from-waste-to-foundations
                      move-full-pile-to-different-pile
-                     ;;move-partial-pile-to-different-pile
                      move-a-card-from-waste-to-pile
                      flip]])
+  (:require [solitaire-clojure.move-partial-pile
+             :refer [move-partial-pile]])
   (:require [clojure.data.csv :as csv]
             [clojure.java.io :as io]
             [solitaire-clojure.helper-functions :refer [force-card-face-up]]))
@@ -111,41 +112,45 @@
             (if-let [result (move-a-card-from-pile-to-foundations game-state 2)]
               (recur result)
               (do
-                ;; (println "move-a-card-from-pile-to-foundations (2) failed")
+                (println "move-a-card-from-pile-to-foundations (2) failed")
                 (if-let [result (move-a-card-from-waste-to-foundations game-state 2)]
                   (recur result)
                   (do
-                    ;; (println "move-a-card-from-waste-to-foundations (2) failed")
+                    (println "move-a-card-from-waste-to-foundations (2) failed")
                     (if-let [result (move-a-card-from-waste-to-pile game-state)]
                       (recur result)
                       (do
-                        ;; (println "move-a-card-from-waste-to-pile failed")
+                        (println "move-a-card-from-waste-to-pile failed")
                         (if-let [result (move-full-pile-to-different-pile game-state)]
                           (recur result)
                           (do
-                            ;; (println "move-full-pile-to-different-pile failed")
-                            (if-let [result (move-a-card-from-pile-to-foundations game-state 13)]
+                            (println "move-full-pile-to-different-pile failed")
+                            (if-let [result (move-partial-pile game-state)]
                               (recur result)
                               (do
-                                ;; (println "move-a-card-from-pile-to-foundations (13) failed")
-                                (if-let [result (move-a-card-from-waste-to-foundations game-state 13)]
+                                (println "move-partial-pile failed")
+                                (if-let [result (move-a-card-from-pile-to-foundations game-state 13)]
                                   (recur result)
                                   (do
-                                    ;; (println "move-a-card-from-waste-to-foundations (13) failed")
-                                    (if-let [result (flip game-state)]
+                                    (println "move-a-card-from-pile-to-foundations (13) failed")
+                                    (if-let [result (move-a-card-from-waste-to-foundations game-state 13)]
                                       (recur result)
                                       (do
-                                        (println "flip failed")
-                                        game-state)))))))))))))))))))
+                                        (println "move-a-card-from-waste-to-foundations (13) failed")
+                                        (if-let [result (flip game-state)]
+                                          (recur result)
+                                          (do
+                                            (println "flip failed")
+                                            game-state)))))))))))))))))))))
 
 (defn -main
   "Main entry point for the Solitaire game"
   []
-  (init-csv-reader "resources/decks-made-2022-01-15-count-10000-dict.csv")
+  (init-csv-reader "test/resources/decks-made-2022-01-15-count-10000-dict.csv")
   (let [[_ final-results]
          (loop [game-number 0
                 record-of-results {:lost-limit-reached 0 :lost-field-repeated 0 :won 0}]
-          (if (< game-number 10000)
+          (if (< game-number 2) ;; change to 10000 for full run
             (let [game-state (deal-next-deck)
                   result (play-game game-state)
                   updated-results

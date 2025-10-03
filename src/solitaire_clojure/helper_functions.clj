@@ -29,3 +29,7 @@
   (some (fn [pile]
           (some (fn [x] (and (= x card) (:face-up x))) pile)) ;; true if card is face up in this pile
         tableau)) ;; returns true if card is face up in any pile
+        ;;
+(defn index-of
+  [coll target]
+  (first (keep-indexed (fn [idx item] (when (= item target) idx)) coll)))
