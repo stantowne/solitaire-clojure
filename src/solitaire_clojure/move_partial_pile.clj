@@ -1,7 +1,8 @@
 (ns solitaire-clojure.move-partial-pile
   (:require [solitaire-clojure.helper-functions
-             :refer [force-last-card-pile-face-up dif-color index-of]]))
+             :refer [index-of]]))
 
+(declare find-partial-move)
 
 (defn move-partial-pile
   "returns a new map with (1) one or more, but fewer than all, of the face-up cards of a tableau pile moved to a different tableau pile,
@@ -11,38 +12,8 @@
   (let [{:keys [field moves-made]} game-state
         tableau (:tableau field)
         foundations (:foundations field)
-        from-pile-num (some (fn [from-pile-num]
-                      (let [from-pile (nth tableau from-pile-num)
-                            from-pile-up-cards (filter :face-up from-pile)]
-                        (when (and (not (empty? from-pile)) ; from pile not empty
-                                   (>= (count (from-pile-up-cards)) 2) ; at least two face up cards in from-pile
-                                   ;; at least one of the face up cards in from-pile can be placed on a foundation
-                                   (some (fn [card] (and (not (= card (last from-pile))) ; not the last card in from-pile
-                                                         (= (:value card) (+ 1 (nth foundations (:suit card))))
-                                                         (some (fn [to-pile-num] (and (not= from-pile-num to-pile-num)
-                                                                                      (= (last (nth tableau to-pile-num))
-                                                                                         {:value (:value card) :suit (mod (+ 2 (:suit card)) 4) :face-up true})))
-                                                               (range 7))))
-                                         from-pile-up-cards)))))
-                      (range 7))
-        card-to-move-up (some (fn [from-pile-num]
-                          (let [from-pile (nth tableau from-pile-num)
-                                from-pile-up-cards (filter :face-up from-pile)]
-                            (some (fn [card] (and (not (= card (last from-pile))) ; not the last card in from-pile
-                                                  (= (:value card) (+ 1 (nth foundations (:suit card))))
-                                                  (some (fn [to-pile-num] (and (not= from-pile-num to-pile-num)
-                                                                               (= (last (nth tableau to-pile-num))
-                                                                                  {:value (:value card) :suit (mod (+ 2 (:suit card)) 4) :face-up true})))
-                                                        (range 7))))
-                                  from-pile-up-cards)))
-        to-pile-num (some  (fn [to-pile-num]
-                              (when (not= from-pile-num to-pile-num)
-                                (let [to-pile (nth tableau to-pile-num)]
-                                  (when (and (not (empty? to-pile))
-                                             (= (last to-pile)
-                                                {:value (:value card-to-move-up) :suit (mod (+ 2 (:suit card-to-move-up)) 4) :face-up true}))
-                                    to-pile-num))))
-                            (range 7))]
+        find-partial-move-result (find-partial-move tableau foundations)
+        {:keys [from-pile-num to-pile-num card-to-move-up]} find-partial-move-result]
     (if (and (some? from-pile-num) (some? to-pile-num) (some? card-to-move-up))
       (let [new-foundations (update foundations (:suit card-to-move-up) inc)
             from-pile (nth tableau from-pile-num)
@@ -54,3 +25,27 @@
             new-field (assoc field :tableau new-tableau :foundations new-foundations)
             new-moves-made (inc moves-made)]
         (assoc game-state :field new-field :moves-made new-moves-made)))))
+
+
+  (defn find-partial-move [tableau foundations]
+    (first
+      (for [from-pile-num (range 7) ; 1.  Try each tableau pile as the source.
+            :let [from-pile (nth tableau from-pile-num) ; 2.  Get the pile.
+                  from-pile-up-cards (filter :face-up from-pile)] ;  3.  Get face-up cards.
+            card from-pile-up-cards ; 4.  Try each face-up card.  Note that this is another local binding.
+            :when (not= card (last from-pile)) ; 5.  Skip the last card.
+            :let [to-pile-num
+                  (some (fn [to-pile-num]
+                          (let [to-pile (nth tableau to-pile-num)]; 6.  Find a valid destination pile.
+                            (when (and (not= from-pile-num to-pile-num)
+                                       (not (empty? to-pile))
+                                       (= (last to-pile)
+                                          {:value (:value card) :suit (mod (+ 2 (:suit card)) 4) :face-up true}))
+                              to-pile-num)))
+                        (range 7))]
+            :when (and to-pile-num  ; 7. Only proceed is a valid destination pile was found.
+                       (= (:value card) (+ 1 (nth foundations (:suit card)))))]
+        {:from-pile-num from-pile-num
+         :to-pile-num to-pile-num
+         :card-to-move-up card})))
+
