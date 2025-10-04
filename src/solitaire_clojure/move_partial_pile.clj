@@ -1,6 +1,6 @@
 (ns solitaire-clojure.move-partial-pile
   (:require [solitaire-clojure.helper-functions
-             :refer [index-of]]))
+             :refer [index-of force-last-card-pile-face-up]]))
 
 (declare find-partial-move)
 
@@ -12,13 +12,13 @@
   (let [{:keys [field moves-made]} game-state
         tableau (:tableau field)
         foundations (:foundations field)
-        find-partial-move-result (find-partial-move tableau foundations)
-        {:keys [from-pile-num to-pile-num card-to-move-up]} find-partial-move-result]
+        partial-move (find-partial-move tableau foundations)
+        {:keys [from-pile-num to-pile-num card-to-move-up]} partial-move]
     (if (and (some? from-pile-num) (some? to-pile-num) (some? card-to-move-up))
       (let [new-foundations (update foundations (:suit card-to-move-up) inc)
             from-pile (nth tableau from-pile-num)
-            new-from-pile (subvec from-pile 0 (index-of from-pile card-to-move-up))
-            cards-to-move-over (subvec from-pile (+ 1 (index-of from-pile card-to-move-up)))
+            new-from-pile (force-last-card-pile-face-up (subvec from-pile 0 (index-of from-pile card-to-move-up)))
+            cards-to-move-over (subvec from-pile (inc (index-of from-pile card-to-move-up)))
             to-pile (nth tableau to-pile-num)
             new-to-pile (into to-pile cards-to-move-over)
             new-tableau (assoc tableau from-pile-num new-from-pile to-pile-num new-to-pile)
