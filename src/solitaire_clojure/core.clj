@@ -94,9 +94,8 @@
 (defn play-game
   ([game-state]
    (loop [game-state game-state]
-     (comment
-     (if (> (:moves-made game-state) 0)  ;; because the initial state is printed in core.clj -main
-       (print-game-state game-state)))
+     (if (> (:moves-made game-state) 200)  ;; because the initial state is printed in core.clj -main
+       (print-game-state game-state))
      (cond
       (= (reduce + (:foundations (:field game-state))) 52)
         {:result :won}
@@ -112,46 +111,46 @@
             (if-let [result (move-a-card-from-pile-to-foundations game-state 2)]
               (recur result)
               (do
-                (println "move-a-card-from-pile-to-foundations (2) failed")
+                ;; (println "move-a-card-from-pile-to-foundations (2) failed")
                 (if-let [result (move-a-card-from-waste-to-foundations game-state 2)]
                   (recur result)
                   (do
-                    (println "move-a-card-from-waste-to-foundations (2) failed")
+                    ;; (println "move-a-card-from-waste-to-foundations (2) failed")
                     (if-let [result (move-a-card-from-waste-to-pile game-state)]
                       (recur result)
                       (do
-                        (println "move-a-card-from-waste-to-pile failed")
+                        ;; (println "move-a-card-from-waste-to-pile failed")
                         (if-let [result (move-full-pile-to-different-pile game-state)]
                           (recur result)
                           (do
-                            (println "move-full-pile-to-different-pile failed")
+                            ;; (println "move-full-pile-to-different-pile failed")
                             (if-let [result (move-partial-pile game-state)]
                               (recur result)
                               (do
-                                (println "move-partial-pile failed")
+                                ;; (println "move-partial-pile failed")
                                 (if-let [result (move-a-card-from-pile-to-foundations game-state 13)]
                                   (recur result)
                                   (do
-                                    (println "move-a-card-from-pile-to-foundations (13) failed")
+                                    ;; (println "move-a-card-from-pile-to-foundations (13) failed")
                                     (if-let [result (move-a-card-from-waste-to-foundations game-state 13)]
                                       (recur result)
                                       (do
-                                        (println "move-a-card-from-waste-to-foundations (13) failed")
+                                        ;; (println "move-a-card-from-waste-to-foundations (13) failed")
                                         (if-let [result (flip game-state)]
                                           (recur result)
                                           (do
-                                            (println "flip failed")
+                                            ;; (println "flip failed")
                                             game-state)))))))))))))))))))))
 
 (defn -main
   "Main entry point for the Solitaire game"
-  []
+  [& args]
   (init-csv-reader "test/resources/decks-made-2022-01-15-count-10000-dict.csv")
   (let [[_ final-results]
          (loop [game-number 0
                 record-of-results {:lost-limit-reached 0 :lost-field-repeated 0 :won 0}]
-          (if (< game-number 2) ;; change to 10000 for full run
-            (let [game-state (deal-next-deck)
+          (if (< game-number 10000) ;; change to 10000 for full run
+            (let [game-state (assoc (deal-next-deck) :game-number game-number)
                   result (play-game game-state)
                   updated-results
                     (cond
