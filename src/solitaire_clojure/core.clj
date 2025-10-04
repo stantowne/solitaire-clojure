@@ -36,17 +36,17 @@
 (defn deal-next-deck []
   (let [deck (next-deck-from-csv)]
     (when deck
-      (let [sd deck
+      (let [sd (vec (rseq deck)) ;; reverse the deck to deal from the end and to conform to GO program
             game-state {:field
-                        {:stock (subvec sd 0 24)
-                         :waste []
-                         :tableau [[(force-card-face-up (nth sd 24))]
-                                   [(nth sd 25) (force-card-face-up (nth sd 31))]
-                                   [(nth sd 26) (nth sd 32) (force-card-face-up (nth sd 37))]
-                                   [(nth sd 27) (nth sd 33) (nth sd 38) (force-card-face-up (nth sd 42))]
-                                   [(nth sd 28) (nth sd 34) (nth sd 39) (nth sd 43) (force-card-face-up (nth sd 46))]
-                                   [(nth sd 29) (nth sd 35) (nth sd 40) (nth sd 44) (nth sd 47) (force-card-face-up (nth sd 49))]
-                                   [(nth sd 30) (nth sd 36) (nth sd 41) (nth sd 45) (nth sd 48) (nth sd 50) (force-card-face-up (nth sd 51))]]
+                        {:stock       (subvec sd 0 24)
+                         :waste       []
+                         :tableau     [[(force-card-face-up (nth sd 51))]
+                                       [(nth sd 50) (force-card-face-up (nth sd 44))]
+                                       [(nth sd 49) (nth sd 43) (force-card-face-up (nth sd 38))]
+                                       [(nth sd 48) (nth sd 42) (nth sd 37) (force-card-face-up (nth sd 33))]
+                                       [(nth sd 47) (nth sd 41) (nth sd 36) (nth sd 32) (force-card-face-up (nth sd 29))]
+                                       [(nth sd 46) (nth sd 40) (nth sd 35) (nth sd 31) (nth sd 28) (force-card-face-up (nth sd 26))]
+                                       [(nth sd 45) (nth sd 39) (nth sd 34) (nth sd 30) (nth sd 27) (nth sd 25) (force-card-face-up (nth sd 24))]]
                          :foundations [0 0 0 0]}
                         :moves-made 0
                         :seen-fields []}]
@@ -66,13 +66,13 @@
           game-state {:field
                       {:stock       (subvec sd 0 24)
                        :waste       []
-                       :tableau     [[(force-card-face-up (nth sd 24))]
-                                     [(nth sd 25) (force-card-face-up (nth sd 31))]
-                                     [(nth sd 26) (nth sd 32) (force-card-face-up (nth sd 37))]
-                                     [(nth sd 27) (nth sd 33) (nth sd 38) (force-card-face-up (nth sd 42))]
-                                     [(nth sd 28) (nth sd 34) (nth sd 39) (nth sd 43) (force-card-face-up (nth sd 46))]
-                                     [(nth sd 29) (nth sd 35) (nth sd 40) (nth sd 44) (nth sd 47) (force-card-face-up (nth sd 49))]
-                                     [(nth sd 30) (nth sd 36) (nth sd 41) (nth sd 45) (nth sd 48) (nth sd 50) (force-card-face-up (nth sd 51))]]
+                       :tableau     [[(force-card-face-up (nth sd 51))]
+                                     [(nth sd 50) (force-card-face-up (nth sd 44))]
+                                     [(nth sd 49) (nth sd 43) (force-card-face-up (nth sd 38))]
+                                     [(nth sd 48) (nth sd 42) (nth sd 37) (force-card-face-up (nth sd 33))]
+                                     [(nth sd 47) (nth sd 41) (nth sd 36) (nth sd 32) (force-card-face-up (nth sd 29))]
+                                     [(nth sd 46) (nth sd 40) (nth sd 35) (nth sd 31) (nth sd 28) (force-card-face-up (nth sd 26))]
+                                     [(nth sd 45) (nth sd 39) (nth sd 34) (nth sd 30) (nth sd 27) (nth sd 25) (force-card-face-up (nth sd 24))]]
                        :foundations [0 0 0 0]}
                       :moves-made  0
                       :seen-fields []}]
@@ -94,7 +94,7 @@
 (defn play-game
   ([game-state]
    (loop [game-state game-state]
-     (if (> (:moves-made game-state) 200)  ;; because the initial state is printed in core.clj -main
+     (if (> (:moves-made game-state) -1)  ;; because the initial state is printed in core.clj -main
        (print-game-state game-state))
      (cond
       (= (reduce + (:foundations (:field game-state))) 52)
@@ -149,7 +149,7 @@
   (let [[_ final-results]
          (loop [game-number 0
                 record-of-results {:lost-limit-reached 0 :lost-field-repeated 0 :won 0}]
-          (if (< game-number 10000) ;; change to 10000 for full run
+          (if (< game-number 1) ;; change to 10000 for full run
             (let [game-state (assoc (deal-next-deck) :game-number game-number)
                   result (play-game game-state)
                   updated-results

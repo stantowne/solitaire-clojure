@@ -4,19 +4,19 @@
 (defn suit-str
   "suit number as string in color"
   [suit]
-  (if (even? suit)
-    (str "\u001b[31m-" (str suit) "\u001b[0m")  ;red -- hearts 0 and diamonds 2
-    (str "\u001b[36m-" (str suit) "\u001b[0m"))) ;blue -- (for black) spades 1 and clubs 3
+  (if (odd? suit)
+    (str "\u001b[31m-" (str suit) "\u001b[0m")  ;red -- hearts 3 and diamonds 1
+    (str "\u001b[36m-" (str suit) "\u001b[0m"))) ;blue -- (for black) spades 2 and clubs 0
 )
 
 (defn suit-str
   "suit number as string in color"
   [suit]
   (case suit
-    0 (str "\u001b[31mH\u001b[0m") ; hearts (red)
-    2 (str "\u001b[31mD\u001b[0m") ; diamonds (red)
-    1 (str "\u001b[36mS\u001b[0m") ; spades (blue)
-    3 (str "\u001b[36mC\u001b[0m") ; clubs (blue)
+    3 (str "\u001b[31mH\u001b[0m") ; hearts (red)
+    1 (str "\u001b[31mD\u001b[0m") ; diamonds (red)
+    2 (str "\u001b[36mS\u001b[0m") ; spades (blue)
+    0 (str "\u001b[36mC\u001b[0m") ; clubs (blue)
     (str suit)))
 
 
@@ -54,10 +54,10 @@
   (doseq [pile tableau]
     (println (str "  " (clojure.string/join " " (map card-str pile)))))
   (println (str "Foundations: "
-            (nth foundations 0) " Hearts; "
-            (nth foundations 1) " Spades; "
-            (nth foundations 2) " Diamonds; "
-            (nth foundations 3) " Clubs"))
+            (nth foundations 0) " Clubs; "
+            (nth foundations 1) " Diamonds; "
+            (nth foundations 2) " Spades; "
+            (nth foundations 3) " Hearts"))
   (println "Moves made:" moves-made)
   (println "---------------------"))
   ;; (read-line)
