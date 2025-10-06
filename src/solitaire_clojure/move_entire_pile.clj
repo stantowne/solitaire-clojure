@@ -72,14 +72,18 @@
                                        (and (= (:value (first from-pile-up-cards)) 13)
                                             (not (empty? from-pile-dn-cards))
                                             (empty? to-pile))
-                                       (and (= (:value (last to-pile)) (inc (:value (first from-pile-up-cards)))
-                                               (dif-color (first from-pile-up-cards) (last to-pile))))))]
+                                       (and (not (empty? to-pile))
+                                            (= (:value (last to-pile)) (inc (:value (first from-pile-up-cards))))
+                                            (dif-color (first from-pile-up-cards) (last to-pile)))))]
                       {:from-pile-num from-pile-num
                        :from-pile from-pile
                        :to-pile-num to-pile-num
                        :to-pile to-pile})
         good-moves (good-moves legal-moves tableau waste)
         best-move (last (sort-by #(count (remove :face-up (:from-pile %))) good-moves))]
+    (println "legal moves:" legal-moves)
+    (println "good moves:" good-moves)
+    (println "best move:" best-move)
     (if (nil? best-move)
       nil
       (let [{:keys [from-pile-num from-pile to-pile-num to-pile]} best-move
