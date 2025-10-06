@@ -17,10 +17,25 @@
   [card]
   (assoc card :face-up false))
 
+(defn color [card]
+  (if (odd? (:suit card))
+    :red
+    :black))
+
+
 (defn dif-color
   "are the two cards of different colors?"
   [card1 card2]
-  (not= (even? (:suit card1)) (even? (:suit card2))))
+  (not= (color card1) (color card2)))
+
+(defn same-color
+  "are the two cards of the same color?"
+  [card1 card2]
+  (= (color card1) (color card2)))
+
+(defn sister-card
+  [card1 card2]
+  (and (= (:value card1) (:value card2)) (= (color card1) (color card2))))
 
 
 (defn card-in-tableau-face-up

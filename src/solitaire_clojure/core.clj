@@ -12,6 +12,8 @@
                      flip]])
   (:require [solitaire-clojure.move-partial-pile
              :refer [move-partial-pile]])
+  (:require [solitaire-clojure.move-entire-pile
+             :refer [move-entire-pile]])
   (:require [clojure.data.csv :as csv]
             [clojure.java.io :as io]
             [solitaire-clojure.helper-functions :refer [force-card-face-up]]))
@@ -120,10 +122,10 @@
                       (recur result)
                       (do
                         ;; (println "move-a-card-from-waste-to-pile failed")
-                        (if-let [result (move-full-pile-to-different-pile game-state)]
+                        (if-let [result (move-entire-pile game-state)]
                           (recur result)
                           (do
-                            ;; (println "move-full-pile-to-different-pile failed")
+                            ;; (println "move-entire-pile failed")
                             (if-let [result (move-partial-pile game-state)]
                               (recur result)
                               (do
