@@ -54,6 +54,27 @@
             (tableau-king-ready-to-move? tableau from-pile-num)))
         legal-moves))))
 
+(defn legal-moves [tableau]
+  (for [from-pile-num (range 7)
+        to-pile-num (range 7)
+        :let [from-pile (nth tableau from-pile-num)
+              from-pile-up-cards (filter :face-up from-pile)
+              from-pile-dn-cards (remove :face-up from-pile)
+              to-pile (nth tableau to-pile-num)]
+        :when (and (not (empty? from-pile))
+                   (or
+                     (and (= (:value (first from-pile-up-cards)) 13)
+                          (not (empty? from-pile-dn-cards))
+                          (empty? to-pile))
+                     (and (not (empty? to-pile))
+                          (= (:value (last to-pile)) (inc (:value (first from-pile-up-cards))))
+                          (dif-color (first from-pile-up-cards) (last to-pile)))))]
+    {:from-pile-num from-pile-num
+     :from-pile from-pile
+     :to-pile-num to-pile-num
+     :to-pile to-pile}))
+
+
 (defn move-entire-pile
   "returns a new map with all the face-up cards of a tableau pile moved to a different tableau pile,
   in certain cases; otherwise return nil"
@@ -61,29 +82,12 @@
   (let [{:keys [field moves-made]} game-state
         tableau (:tableau field)
         waste (:waste field)
-        legal-moves (for [from-pile-num (range 7)
-                          to-pile-num (range 7)
-                          :let [from-pile (nth tableau from-pile-num)
-                                from-pile-up-cards (filter :face-up from-pile)
-                                from-pile-dn-cards (remove :face-up from-pile)
-                                to-pile (nth tableau to-pile-num)]
-                          :when (and (not (empty? from-pile))
-                                     (or
-                                       (and (= (:value (first from-pile-up-cards)) 13)
-                                            (not (empty? from-pile-dn-cards))
-                                            (empty? to-pile))
-                                       (and (not (empty? to-pile))
-                                            (= (:value (last to-pile)) (inc (:value (first from-pile-up-cards))))
-                                            (dif-color (first from-pile-up-cards) (last to-pile)))))]
-                      {:from-pile-num from-pile-num
-                       :from-pile from-pile
-                       :to-pile-num to-pile-num
-                       :to-pile to-pile})
+        legal-moves (legal-moves tableau)
         good-moves (good-moves legal-moves tableau waste)
         best-move (last (sort-by #(count (remove :face-up (:from-pile %))) good-moves))]
-    (println "legal moves:" legal-moves)
-    (println "good moves:" good-moves)
-    (println "best move:" best-move)
+    ;; (println "legal moves:" legal-moves)
+    ;; (println "good moves:" good-moves)
+    ;; (println "best move:" best-move)
     (if (nil? best-move)
       nil
       (let [{:keys [from-pile-num from-pile to-pile-num to-pile]} best-move

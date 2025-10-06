@@ -96,7 +96,7 @@
 (defn play-game
   ([game-state]
    (loop [game-state game-state]
-     (if (> (:moves-made game-state) -1)  ;; because the initial state is printed in core.clj -main
+     (if (> (:moves-made game-state) 200)  ;; because the initial state is printed in core.clj -main
        (print-game-state game-state))
      (cond
       (= (reduce + (:foundations (:field game-state))) 52)
@@ -151,7 +151,7 @@
   (let [[_ final-results]
          (loop [game-number 0
                 record-of-results {:lost-limit-reached 0 :lost-field-repeated 0 :won 0}]
-          (if (< game-number 1) ;; change to 10000 for full run
+          (if (< game-number 10000) ;; change to 10000 for full run
             (let [game-state (assoc (deal-next-deck) :game-number game-number)
                   result (play-game game-state)
                   updated-results
