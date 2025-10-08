@@ -169,6 +169,8 @@
                       (do
                         (println "Unexpected result:" result)
                         record-of-results))]
+            (when (= (:result result) :won)
+              (spit "decks-won-clojure.txt" (str "\nGame number " game-number " won.") :append true))
             (recur (inc game-number) updated-results))
             [game-number record-of-results]))]
             (println "Record of Results:" final-results)))
