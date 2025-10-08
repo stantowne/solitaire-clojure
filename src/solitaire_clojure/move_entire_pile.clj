@@ -38,13 +38,13 @@
           (let [{:keys [from-pile-num from-pile to-pile]} move]
           (or
             ;; (a) from-pile has at least one down card
-            (do (println "first test" (some #(not (:face-up %)) from-pile))
+            (do ;; (println "first test" (some #(not (:face-up %)) from-pile))
                 (some #(not (:face-up %)) from-pile))
             ;; (b) sister card of last to-pile card is face-up in tableau
-            (do (println "second test" (sister-card-in-tableau? (last to-pile) tableau))
+            (do ;; (println "second test" (sister-card-in-tableau? (last to-pile) tableau))
                 (sister-card-in-tableau? (last to-pile) tableau))
             ;; (c) tableau includes a pile with at least one down card and first-up-card is king
-            (do (println "third-test" (tableau-king-ready-to-move? tableau from-pile-num))
+            (do ;; (println "third-test" (tableau-king-ready-to-move? tableau from-pile-num))
                 (tableau-king-ready-to-move? tableau from-pile-num)))))
         legal-moves))))
 
@@ -79,9 +79,9 @@
         legal-moves (legal-moves tableau)
         good-moves (good-moves legal-moves tableau waste)
         best-move (last (sort-by #(count (remove :face-up (:from-pile %))) good-moves))]
-    (println "legal moves:" legal-moves)
-    (println "good moves:" good-moves)
-    (println "best move:" best-move)
+    ;; (println "legal moves:" legal-moves)
+    ;; (println "good moves:" good-moves)
+    ;; (println "best move:" best-move)
     (if (nil? best-move)
       nil
       (let [{:keys [from-pile-num from-pile to-pile-num to-pile]} best-move
