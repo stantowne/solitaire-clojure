@@ -35,7 +35,9 @@
 
 (defn sister-card
   [card1 card2]
-  (and (= (:value card1) (:value card2)) (= (color card1) (color card2))))
+  (and (= (:value card1) (:value card2))
+       (= (color card1) (color card2))
+       (not (= (:suit card1) (:suit card2)))))
 
 
 (defn card-in-tableau-face-up

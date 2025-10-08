@@ -1,5 +1,5 @@
 (ns solitaire-clojure.move-entire-pile
-  (:require [solitaire-clojure.helper-functions :refer [dif-color force-last-card-pile-face-up]]))
+  (:require [solitaire-clojure.helper-functions :refer [dif-color sister-card force-last-card-pile-face-up]]))
 
 
 (defn sister-card-in-tableau? [card tableau]
@@ -7,19 +7,10 @@
     (fn [pile]
       (some
         (fn [c]
-          (and (:face-up c)
-               (= (:value c) (:value card))
-               (= (:color c) (:color card))))
+          (and (:face-up c) (sister-card c card)))
         pile))
     tableau))
 
-(defn sister-card-in-tableau-shorter? [card tableau]
-  (some #(some (fn [c]
-                 (and (:face-up c)
-                      (= (:value c) (:value card))
-                      (= (:color c) (:color card))))
-               %)
-        tableau))
 
 (defn tableau-king-ready-to-move?
   "Returns true if there is a pile (not from-pile-num)
@@ -31,7 +22,7 @@
             first-card (first pile)
             up-cards (filter :face-up pile)
             first-up-card (first up-cards)]
-        (and (not= pile-num from-pile-num) ; (1) pile-num is not from-pile-num
+        (and (not (= pile-num from-pile-num)) ; (1) pile-num is not from-pile-num
              (not (empty? pile)) ; (2) pile is not empty
              (not (:face-up first-card)) ; (3) first card is face-down
              first-up-card ; (4) there is at least one face-up card
@@ -43,15 +34,18 @@
     (if (and last-waste (= 13 (:value last-waste)))
       legal-moves
       (filter
-        (fn [{:keys [from-pile-num from-pile to-pile]}]
+        (fn [move]
+          (let [{:keys [from-pile-num from-pile to-pile]} move]
           (or
             ;; (a) from-pile has at least one down card
-            (some #(not (:face-up %)) from-pile)
+            (do (println "first test" (some #(not (:face-up %)) from-pile))
+                (some #(not (:face-up %)) from-pile))
             ;; (b) sister card of last to-pile card is face-up in tableau
-            (and (not (empty? to-pile))
-                 (sister-card-in-tableau? (last to-pile) tableau))
+            (do (println "second test" (sister-card-in-tableau? (last to-pile) tableau))
+                (sister-card-in-tableau? (last to-pile) tableau))
             ;; (c) tableau includes a pile with at least one down card and first-up-card is king
-            (tableau-king-ready-to-move? tableau from-pile-num)))
+            (do (println "third-test" (tableau-king-ready-to-move? tableau from-pile-num))
+                (tableau-king-ready-to-move? tableau from-pile-num)))))
         legal-moves))))
 
 (defn legal-moves [tableau]
@@ -85,9 +79,9 @@
         legal-moves (legal-moves tableau)
         good-moves (good-moves legal-moves tableau waste)
         best-move (last (sort-by #(count (remove :face-up (:from-pile %))) good-moves))]
-    ;; (println "legal moves:" legal-moves)
-    ;; (println "good moves:" good-moves)
-    ;; (println "best move:" best-move)
+    (println "legal moves:" legal-moves)
+    (println "good moves:" good-moves)
+    (println "best move:" best-move)
     (if (nil? best-move)
       nil
       (let [{:keys [from-pile-num from-pile to-pile-num to-pile]} best-move
