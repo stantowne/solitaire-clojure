@@ -78,7 +78,7 @@
         waste (:waste field)
         legal-moves (legal-moves tableau)
         good-moves (good-moves legal-moves tableau waste)
-        best-move (last (sort-by #(count (remove :face-up (:from-pile %))) good-moves))]
+        best-move (first (sort-by #(count (remove :face-up (:from-pile %))) good-moves))]
     ;; (println "legal moves:" legal-moves)
     ;; (println "good moves:" good-moves)
     ;; (println "best move:" best-move)
