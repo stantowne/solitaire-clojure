@@ -76,8 +76,8 @@
                      value (:value pile-last-card)
                      foundation-value (foundations suit-number)]
                   (when (and (= value (inc foundation-value))
+                             (<= value max-value-to-auto-move)
                              (or
-                                (<= value max-value-to-auto-move)
                                 (and (>= (foundations (mod (+ suit-number 1) 4)) (- foundation-value 2))
                                      (card-in-tableau-face-up tableau {:suit (mod (+ suit-number 3) 4) :value (- value 1)}))
                                 (and (>= (foundations (mod (+ suit-number 3) 4)) (- foundation-value 2))
@@ -101,16 +101,20 @@
   [game-state]
   (let [{:keys [field moves-made]} game-state
         waste (:waste field)
+        waste-last-card (last waste)
         tableau (:tableau field)]
     (if (empty? waste)
       nil
       (some
         (fn [pile-num]
-         (let [pile (nth tableau pile-num)
-               waste-last-card (last waste)]
+         (let [pile (tableau pile-num)]
           (cond
             ;; move king to empty pile
-            (and (empty? pile) (= (:value waste-last-card) 13))
+            (do
+              ;; (println "Testing empty pile for king move" pile-num)
+              ;; (println "Waste last card:" waste-last-card "Value:" (:value waste-last-card))
+              ;; (println "Pile Number:" pile-num "Pile:" pile)
+              (and (empty? pile) (= (:value waste-last-card) 13)))
             (let [new-pile (vec (conj pile waste-last-card)) ; no need to force face up, waste cards are always face up
                   new-tableau (assoc tableau pile-num new-pile)
                   new-waste (vec (butlast waste))
