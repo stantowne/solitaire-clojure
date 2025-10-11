@@ -64,7 +64,7 @@
 (defn move-a-card-from-pile-to-foundations
   "returns a new map with the last card in a pile moved to the foundations in certain cases;
   otherwise return nil"
-  [game-state max-value-to-auto-move]
+  [game-state do-not-move-above no-final-test-needed-below]
   (some (fn [pile-num]
           (let [{:keys [field moves-made]} game-state
                 tableau (:tableau field)
@@ -76,8 +76,9 @@
                      value (:value pile-last-card)
                      foundation-value (foundations suit-number)]
                   (when (and (= value (inc foundation-value))
-                             (<= value max-value-to-auto-move)
+                             (<= value do-not-move-above)
                              (or
+                                (< value no-final-test-needed-below)
                                 (and (>= (foundations (mod (+ suit-number 1) 4)) (- foundation-value 2))
                                      (card-in-tableau-face-up tableau {:suit (mod (+ suit-number 3) 4) :value (- value 1)}))
                                 (and (>= (foundations (mod (+ suit-number 3) 4)) (- foundation-value 2))

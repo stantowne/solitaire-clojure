@@ -21,13 +21,13 @@
 
 (def move-limit 200)
 (def print-if-move-count-exceeds 200)
-(def first-deck-num 0)
-(def num-of-decks 10000)
+(def first-deck-num 0) ; files are treated as 0 base
+(def num-of-decks 10000) ;; do not exceed number of decks minus first-deck-num
 (def print-func-failure false)
 
 
-(defn init-csv-reader [filepath] ;; "resources/decks-made-2022-01=15-count-10000-dict.csv"
-  (reset! csv-reader-atom (csv/read-csv (io/reader filepath))))
+(defn init-csv-reader [filepath first-deck-num] ;; "resources/decks-made-2022-01=15-count-10000-dict.csv"
+  (reset! csv-reader-atom (drop first-deck-num (csv/read-csv (io/reader filepath)))))
 
 (defn next-deck-from-csv []
   (when-let [lines @csv-reader-atom]
@@ -116,7 +116,7 @@
       :else
          (let [new-seen-fields (conj (:seen-fields game-state) (:field game-state))
                game-state (assoc game-state :seen-fields new-seen-fields)]
-            (if-let [result (move-a-card-from-pile-to-foundations game-state 2)]
+            (if-let [result (move-a-card-from-pile-to-foundations game-state 2 13)]
               (recur result)
               (do
                 (when print-func-failure (println "move-a-card-from-pile-to-foundations (2) failed"))
@@ -136,7 +136,7 @@
                               (recur result)
                               (do
                                 (when print-func-failure (println "move-partial-pile failed"))
-                                (if-let [result (move-a-card-from-pile-to-foundations game-state 13)]
+                                (if-let [result (move-a-card-from-pile-to-foundations game-state 13 9)]
                                   (recur result)
                                   (do
                                     (when print-func-failure (println "move-a-card-from-pile-to-foundations (13) failed"))
