@@ -44,12 +44,12 @@
 (defn print-game-state
   "Prints the current game state"
   [game-state]
-  (let [{:keys [field moves-made game-number]} game-state
+  (let [{:keys [field moves-made deck-number]} game-state
         stock (:stock field)
         waste (:waste field)
         tableau (:tableau field)
         foundations (:foundations field)]
-  (println (str "Current Game State:  \nGame Number: " game-number))
+  (println (str "Current Game State:  \nDeck Number: " deck-number))
   (println (str "Moves Made: " moves-made))
   (println "Stock:" (clojure.string/join " " (map card-str stock)))
   (println "Waste:" (clojure.string/join " " (map card-str waste)))
