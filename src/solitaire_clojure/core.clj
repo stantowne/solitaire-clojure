@@ -155,10 +155,10 @@
   [& args]
   (init-csv-reader "test/resources/decks-made-2022-01-15-count-10000-dict.csv")
   (let [[_ final-results]
-         (loop [game-number 0
+         (loop [deck-number first-deck-num
                 record-of-results {:lost-limit-reached 0 :lost-field-repeated 0 :won 0}]
-          (if (< game-number num-of-decks) ;; change to 10000 for full run
-            (let [game-state (assoc (deal-next-deck) :game-number game-number)
+          (if (< deck-number (+ first-deck-num num-of-decks)) ;; change to 10000 for full run
+            (let [game-state (assoc (deal-next-deck) :deck-number deck-number)
                   result (play-game game-state)
                   updated-results
                     (cond
@@ -170,7 +170,7 @@
                         (println "Unexpected result:" result)
                         record-of-results))]
             (when (= (:result result) :won)
-              (spit "decks-won-clojure.txt" (str "\nGame number " game-number " won.") :append true))
-            (recur (inc game-number) updated-results))
-            [game-number record-of-results]))]
+              (spit "decks-won-clojure.txt" (str "\nDeck number " deck-number " won.") :append true))
+            (recur (inc deck-number) updated-results))
+            [deck-number record-of-results]))]
             (println "Record of Results:" final-results)))
