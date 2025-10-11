@@ -152,8 +152,8 @@
 
 (defn -main
   "Main entry point for the Solitaire game"
-  [& args]
-  (init-csv-reader "test/resources/decks-made-2022-01-15-count-10000-dict.csv")
+  []
+  (init-csv-reader "test/resources/decks-made-2022-01-15-count-10000-dict.csv" first-deck-num)
   (let [[_ final-results]
          (loop [deck-number first-deck-num
                 record-of-results {:lost-limit-reached 0 :lost-field-repeated 0 :won 0}]
