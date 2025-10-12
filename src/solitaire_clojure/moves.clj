@@ -79,12 +79,16 @@
                              (<= value do-not-move-above)
                              (or
                                 (< value no-final-test-needed-below)
-                                (and (>= (foundations (mod (+ suit-number 1) 4)) (- foundation-value 2))
-                                     (card-in-tableau-face-up tableau {:suit (mod (+ suit-number 3) 4) :value (- value 1)}))
-                                (and (>= (foundations (mod (+ suit-number 3) 4)) (- foundation-value 2))
-                                     (card-in-tableau-face-up tableau {:suit (mod (+ suit-number 1) 4) :value (- value 1)}))
-                                (and (>= (foundations (mod (+ suit-number 1) 4)) (- foundation-value 2))
-                                     (>= (foundations (mod (+ suit-number 3) 4)) (- foundation-value 2)))))
+
+                                (and (>= (foundations (mod (+ suit-number 1) 4)) (- value 2))
+                                     (card-in-tableau-face-up tableau {:suit (mod (+ suit-number 3) 4) :value (- value 1) :face-up true}))
+
+                                (and (>= (foundations (mod (+ suit-number 3) 4)) (- value 2))
+                                     (card-in-tableau-face-up tableau {:suit (mod (+ suit-number 1) 4) :value (- value 1) :face-up true}))
+
+                                (and (>= (foundations (mod (+ suit-number 1) 4)) (- value 2))
+                                     (>= (foundations (mod (+ suit-number 3) 4)) (- value 2)))))
+
                     (let [new-foundations (update foundations suit-number inc)
                           new-pile (vec (butlast pile))
                           new-pile (if (seq new-pile)
