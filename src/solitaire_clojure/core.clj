@@ -15,7 +15,8 @@
              :refer [move-entire-pile]])
   (:require [clojure.data.csv :as csv]
             [clojure.java.io :as io]
-            [solitaire-clojure.helper-functions :refer [force-card-face-up]]))
+            [solitaire-clojure.helper-functions :refer [force-card-face-up]])
+  (require [solitaire-clojure.flip :refer [flip]]))
 
 (defonce csv-reader-atom (atom nil))
 
@@ -49,8 +50,8 @@
     (when deck
       (let [sd (vec (rseq deck)) ;; reverse the deck to deal from the end and to conform to GO program
             game-state {:field
-                        {:stock       (subvec sd 0 24)
-                         :waste       []
+                        {:stock       []
+                         :waste       (subvec sd 0 24)
                          :tableau     [[(force-card-face-up (nth sd 51))]
                                        [(nth sd 50) (force-card-face-up (nth sd 44))]
                                        [(nth sd 49) (nth sd 43) (force-card-face-up (nth sd 38))]
@@ -60,7 +61,8 @@
                                        [(nth sd 45) (nth sd 39) (nth sd 34) (nth sd 30) (nth sd 27) (nth sd 25) (force-card-face-up (nth sd 24))]]
                          :foundations [0 0 0 0]}
                         :moves-made 0
-                        :seen-fields []}]
+                        :seen-fields []
+                        :initial-flip-count-at-start-of-round 8}]
         game-state))))
 
 (comment
@@ -75,8 +77,8 @@
     [deck]
     (let [sd (vec (shuffle deck))
           game-state {:field
-                      {:stock       (subvec sd 0 24)
-                       :waste       []
+                      {:stock       []
+                       :waste       (subvec sd 0 24) ; as if 8 initial flips had been made
                        :tableau     [[(force-card-face-up (nth sd 51))]
                                      [(nth sd 50) (force-card-face-up (nth sd 44))]
                                      [(nth sd 49) (nth sd 43) (force-card-face-up (nth sd 38))]
@@ -86,7 +88,8 @@
                                      [(nth sd 45) (nth sd 39) (nth sd 34) (nth sd 30) (nth sd 27) (nth sd 25) (force-card-face-up (nth sd 24))]]
                        :foundations [0 0 0 0]}
                       :moves-made  0
-                      :seen-fields []}]
+                      :seen-fields []
+                      :initial-flip-count-at-start-of-round 8}]
       game-state))
   )
 ;; The result of this function is a map with three keys: :field, :moves-made, and :seen-fields
