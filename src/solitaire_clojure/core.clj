@@ -19,11 +19,14 @@
 
 (defonce csv-reader-atom (atom nil))
 
-(def move-limit 200)
-(def print-if-move-count-exceeds 200)
-(def first-deck-num 0) ; files are treated as 0 base
-(def num-of-decks 10000) ;; do not exceed number of decks minus first-deck-num
-(def print-func-failure false)
+(def config
+  {:decks-filepath "test/resources/decks-made-2022-01-15-count-10000-dict.csv"
+   :first-deck-num 0 ; files are treated as 0 base
+   :num-of-decks 10000 ;; do not exceed number of decks minus first-deck-num
+   :move-limit 200
+   :print-if-move-count-exceeds 200
+   :print-func-failure false})
+
 
 
 (defn init-csv-reader [filepath first-deck-num] ;; "resources/decks-made-2022-01=15-count-10000-dict.csv"
@@ -102,12 +105,12 @@
 (defn play-game
   ([game-state]
    (loop [game-state game-state]
-     (if (> (:moves-made game-state) print-if-move-count-exceeds)  ;; because the initial state is printed in core.clj -main
+     (if (> (:moves-made game-state) (:print-if-move-count-exceeds config))  ;; because the initial state is printed in core.clj -main
        (print-game-state game-state))
      (cond
       (= (reduce + (:foundations (:field game-state))) 52)
         {:result :won}
-      (= (:moves-made game-state) move-limit)
+      (= (:moves-made game-state) (:move-limit config))
         {:result :lost-limit-reached}
       (some #(= % (:field game-state)) (:seen-fields game-state))
         (let [idx-pair (some #(when (= (second %) (:field game-state)) %) (map-indexed vector (:seen-fields game-state)))]
@@ -119,45 +122,45 @@
             (if-let [result (move-a-card-from-pile-to-foundations game-state 2 13)]
               (recur result)
               (do
-                (when print-func-failure (println "move-a-card-from-pile-to-foundations (2) failed"))
+                (when (:print-func-failure config) (println "move-a-card-from-pile-to-foundations (2) failed"))
                 (if-let [result (move-a-card-from-waste-to-foundations game-state 2)]
                   (recur result)
                   (do
-                    (when print-func-failure (println "move-a-card-from-waste-to-foundations (2) failed"))
+                    (when (:print-func-failure config) (println "move-a-card-from-waste-to-foundations (2) failed"))
                     (if-let [result (move-a-card-from-waste-to-pile game-state)]
                       (recur result)
                       (do
-                        (when print-func-failure (println "move-a-card-from-waste-to-pile failed"))
+                        (when (:print-func-failure config) (println "move-a-card-from-waste-to-pile failed"))
                         (if-let [result (move-entire-pile game-state)]
                           (recur result)
                           (do
-                            (when print-func-failure (println "move-entire-pile failed"))
+                            (when (:print-func-failure config) (println "move-entire-pile failed"))
                             (if-let [result (move-partial-pile game-state)]
                               (recur result)
                               (do
-                                (when print-func-failure (println "move-partial-pile failed"))
+                                (when (:print-func-failure config) (println "move-partial-pile failed"))
                                 (if-let [result (move-a-card-from-pile-to-foundations game-state 13 9)]
                                   (recur result)
                                   (do
-                                    (when print-func-failure (println "move-a-card-from-pile-to-foundations (13) failed"))
+                                    (when (:print-func-failure config) (println "move-a-card-from-pile-to-foundations (13) failed"))
                                     (if-let [result (move-a-card-from-waste-to-foundations game-state 13)]
                                       (recur result)
                                       (do
-                                        (when print-func-failure (println "move-a-card-from-waste-to-foundations (13) failed"))
+                                        (when (:print-func-failure config) (println "move-a-card-from-waste-to-foundations (13) failed"))
                                         (if-let [result (flip game-state)]
                                           (recur result)
                                           (do
-                                            (when print-func-failure (println "flip failed"))
+                                            (when (:print-func-failure config) (println "flip failed"))
                                             game-state)))))))))))))))))))))
 
 (defn -main
   "Main entry point for the Solitaire game"
   []
-  (init-csv-reader "test/resources/decks-made-2022-01-15-count-10000-dict.csv" first-deck-num)
+  (init-csv-reader (:decks-filepath config) (:first-deck-num config))
   (let [[_ final-results]
-         (loop [deck-number first-deck-num
+         (loop [deck-number (:first-deck-num config)
                 record-of-results {:lost-limit-reached 0 :lost-field-repeated 0 :won 0}]
-          (if (< deck-number (+ first-deck-num num-of-decks)) ;; change to 10000 for full run
+          (if (< deck-number (+ (:first-deck-num config) (:num-of-decks config))) ;; change to 10000 for full run
             (let [game-state (assoc (deal-next-deck) :deck-number deck-number)
                   result (play-game game-state)
                   updated-results
