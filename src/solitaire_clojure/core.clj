@@ -16,10 +16,10 @@
 
 (def config
   {:decks-filepath "test/resources/decks-made-2022-01-15-count-10000-dict.csv"
-   :first-deck-num 0 ; files are treated as 0 base
-   :num-of-decks 10000 ;; do not exceed number of decks minus first-deck-num
+   :first-deck-num 1 ; files are treated as 0 base
+   :num-of-decks 1 ;; do not exceed number of decks minus first-deck-num
    :move-limit 200
-   :print-if-move-count-exceeds 200
+   :print-if-move-count-exceeds -1
    :print-func-failure false})
 
 
@@ -45,7 +45,7 @@
       (let [sd (vec (rseq deck)) ;; reverse the deck to deal from the end and to conform to GO program
             game-state {:field
                         {:stock       []
-                         :waste       (subvec sd 0 24)
+                         :waste       (vec (reverse (subvec sd 0 24)))
                          :tableau     [[(force-card-face-up (nth sd 51))]
                                        [(nth sd 50) (force-card-face-up (nth sd 44))]
                                        [(nth sd 49) (nth sd 43) (force-card-face-up (nth sd 38))]
