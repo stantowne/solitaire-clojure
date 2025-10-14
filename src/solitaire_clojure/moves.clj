@@ -1,8 +1,6 @@
 (ns solitaire-clojure.moves
   (:require [solitaire-clojure.helper-functions
-             :refer [force-card-face-up force-last-card-pile-face-up force-card-face-down dif-color card-in-tableau-face-up]]))
-
-
+             :refer [force-last-card-pile-face-up dif-color card-in-tableau-face-up]]))
 
 (defn move-a-card-from-waste-to-foundations
   "returns a new map with the last card in the waste moved to the foundations in certain cases;

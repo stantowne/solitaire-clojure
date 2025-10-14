@@ -40,9 +40,9 @@
             new-waste []
             new-field (assoc field :stock new-stock :waste new-waste)
             new-moves-made (inc moves-made)
-            flip-times (min (- initial-flip-count-at-start-of-round 1) (quot (count(new-stock)) 3))] ;; how many times to flip three forward
-        (assoc game-state :field new-field :moves-made new-moves-made)
-        (nth (iterate flip-three-forward game-state) flip-times)) ;; now flip three forward(
+            flip-times (max 0 (min (- initial-flip-count-at-start-of-round 1) (- (quot (count new-stock) 3) 1)))] ;; how many times to flip three forward
+        (assoc game-state :field new-field :moves-made new-moves-made :initial-flip-count-at-start-of-round flip-times)
+        (nth (iterate flip-three-forward game-state) flip-times)) ;; now flip three forward
 
       (> stock-count 2) ;; three or more cards in stock
       (flip-three-forward game-state)

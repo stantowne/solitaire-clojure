@@ -1,22 +1,16 @@
 (ns solitaire-clojure.core
   (:gen-class)
-  (:require [solitaire-clojure.print
-             :refer [print-game-state]])
-  (:require [solitaire-clojure.helper-functions
-             :refer [force-card-face-up]])
-  (:require [solitaire-clojure.moves
-             :refer [move-a-card-from-pile-to-foundations
-                     move-a-card-from-waste-to-foundations
-                     move-a-card-from-waste-to-pile
-                     flip]])
-  (:require [solitaire-clojure.move-partial-pile
-             :refer [move-partial-pile]])
-  (:require [solitaire-clojure.move-entire-pile
-             :refer [move-entire-pile]])
-  (:require [clojure.data.csv :as csv]
-            [clojure.java.io :as io]
-            [solitaire-clojure.helper-functions :refer [force-card-face-up]])
-  (require [solitaire-clojure.flip :refer [flip]]))
+  (:require
+    [solitaire-clojure.print :refer [print-game-state]]
+    [solitaire-clojure.helper-functions :refer [force-card-face-up]]
+    [solitaire-clojure.moves :refer [move-a-card-from-pile-to-foundations
+                                     move-a-card-from-waste-to-foundations
+                                     move-a-card-from-waste-to-pile]]
+    [solitaire-clojure.move-partial-pile :refer [move-partial-pile]]
+    [solitaire-clojure.move-entire-pile :refer [move-entire-pile]]
+    [clojure.data.csv :as csv]
+    [clojure.java.io :as io]
+    [solitaire-clojure.flip :refer [flip]]))
 
 (defonce csv-reader-atom (atom nil))
 
@@ -163,20 +157,20 @@
   (let [[_ final-results]
          (loop [deck-number (:first-deck-num config)
                 record-of-results {:lost-limit-reached 0 :lost-field-repeated 0 :won 0}]
-          (if (< deck-number (+ (:first-deck-num config) (:num-of-decks config))) ;; change to 10000 for full run
-            (let [game-state (assoc (deal-next-deck) :deck-number deck-number)
-                  result (play-game game-state)
-                  updated-results
-                    (cond
-                    (= (:result result) :won) (update record-of-results :won inc)
-                    (= (:result result) :lost-limit-reached) (update record-of-results :lost-limit-reached inc)
-                    (= (:result result) :lost-field-repeated) (update record-of-results :lost-field-repeated inc)
-                    :else
-                      (do
-                        (println "Unexpected result:" result)
-                        record-of-results))]
-            (when (= (:result result) :won)
-              (spit "decks-won-clojure.txt" (str "\nDeck number " deck-number " won.") :append true))
-            (recur (inc deck-number) updated-results))
-            [deck-number record-of-results]))]
-            (println "Record of Results:" final-results)))
+           (if (< deck-number (+ (:first-deck-num config) (:num-of-decks config))) ;; change to 10000 for full run
+             (let [game-state (assoc (deal-next-deck) :deck-number deck-number)
+                   result (play-game game-state)
+                   updated-results
+                   (cond
+                     (= (:result result) :won) (update record-of-results :won inc)
+                     (= (:result result) :lost-limit-reached) (update record-of-results :lost-limit-reached inc)
+                     (= (:result result) :lost-field-repeated) (update record-of-results :lost-field-repeated inc)
+                     :else
+                     (do
+                       (println "Unexpected result:" result)
+                       record-of-results))]
+               (when (= (:result result) :won)
+                 (spit "decks-won-clojure.txt" (str "\nDeck number " deck-number " won.") :append true))
+               (recur (inc deck-number) updated-results))
+             [deck-number record-of-results]))]
+    (println "Record of Results:" final-results)))
