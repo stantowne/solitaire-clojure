@@ -51,14 +51,14 @@
         foundations (:foundations field)]
   (println (str "Current Game State:  \nDeck Number: " deck-number))
   (println (str "Moves Made: " moves-made))
-  (println "Stock:" (clojure.string/join " " (map card-str stock)))
-  (println "Waste:" (clojure.string/join " " (map card-str waste)))
-  (println (str "Foundations: "
+  (println (str "Stock("(count stock)"): " (clojure.string/join " " (map card-str stock))))
+  (println (str "Waste("(count waste)"): " (clojure.string/join " " (map card-str waste))))
+  (println (str "Foundations("(reduce + foundations)"): "
                 (nth foundations 0) " Clubs; "
                 (nth foundations 1) " Diamonds; "
                 (nth foundations 2) " Spades; "
                 (nth foundations 3) " Hearts"))
-  (println "Tableau:")
+  (println (str "Tableau:("(reduce + (map count tableau))"): "))
   (print-tableau tableau)
   (println)
   (println "---------------------"))
