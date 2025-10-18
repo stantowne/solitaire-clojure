@@ -45,7 +45,7 @@
       (let [sd (vec (rseq deck)) ;; reverse the deck to deal from the end and to conform to GO program
             game-state {:field
                         {:stock       []
-                         :waste       (vec (reverse (subvec sd 0 24)))
+                         :waste       (vec (map force-card-face-up (reverse (subvec sd 0 24))))
                          :tableau     [[(force-card-face-up (nth sd 51))]
                                        [(nth sd 50) (force-card-face-up (nth sd 44))]
                                        [(nth sd 49) (nth sd 43) (force-card-face-up (nth sd 38))]
