@@ -157,6 +157,7 @@
   (let [[_ final-results]
          (loop [deck-number (:first-deck-num config)
                 record-of-results {:lost-limit-reached 0 :lost-field-repeated 0 :won 0}]
+           (when (:print-each-deck-num-as-it-starts config)(println "Starting deck number:" deck-number))
            (if (< deck-number (+ (:first-deck-num config) (:num-of-decks config))) ;; change to 10000 for full run
              (let [game-state (assoc (deal-next-deck) :deck-number deck-number)
                    result (play-game game-state)
