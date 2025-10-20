@@ -109,9 +109,7 @@
       (= (:moves-made game-state) (:move-limit config))
         {:result :lost-limit-reached}
       (some #(= % (:field game-state)) (:seen-fields game-state))
-        (let [idx-pair (some #(when (= (second %) (:field game-state)) %) (map-indexed vector (:seen-fields game-state)))]
-          (when idx-pair
-            {:result :lost-field-repeated :index (first idx-pair)}))
+        {:result :lost-field-repeated}
       :else
          (let [new-seen-fields (conj (:seen-fields game-state) (:field game-state))
                game-state (assoc game-state :seen-fields new-seen-fields)]
