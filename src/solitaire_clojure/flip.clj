@@ -24,9 +24,10 @@
   this is the only function which never returns nil
   it is the innermost function in the if-let group"
   [game-state]
-  (let [{:keys [field moves-made initial-flip-count-at-start-of-round]} game-state
+  (let [{:keys [field moves-made]} game-state
         waste (:waste field)
         stock (:stock field)
+        initial-flips-of-round (:initial-flips-of-round field)
         stock-count (count stock)
         waste-count (count waste)]
 
@@ -38,7 +39,8 @@
       (= stock-count 0) ;; no cards in stock -- flip entire waste to stock
       (let [new-stock (mapv force-card-face-down (vec (reverse waste)))
             new-waste []
-            new-field (assoc field :stock new-stock :waste new-waste)
+            flip-times (max 0 (min (- initial-flips-of-round 1) (- (quot (count new-stock) 3) 1))) ;; how many times to flip three forward
+            new-field (assoc field :stock new-stock :waste new-waste :initial-flips-of-round flip-times)
             new-moves-made (inc moves-made)
             flip-times (max 0 (min (- initial-flip-count-at-start-of-round 1) (- (quot (count new-stock) 3) 1)))] ;; how many times to flip three forward
         (assoc game-state :field new-field :moves-made new-moves-made :initial-flip-count-at-start-of-round flip-times)

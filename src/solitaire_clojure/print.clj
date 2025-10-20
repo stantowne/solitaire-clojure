@@ -48,9 +48,11 @@
         stock (:stock field)
         waste (:waste field)
         tableau (:tableau field)
-        foundations (:foundations field)]
+        foundations (:foundations field)
+        initial-flips-of-round (:initial-flips-of-round field)]
   (println (str "Current Game State:  \nDeck Number: " deck-number))
   (println (str "Moves Made: " moves-made))
+  (println (str "Initial Flips of Current Round: " initial-flips-of-round))
   (println (str "Stock("(count stock)"): " (clojure.string/join " " (map card-str stock))))
   (println (str "Waste("(count waste)"): " (clojure.string/join " " (map card-str waste))))
   (println (str "Foundations("(reduce + foundations)"): "

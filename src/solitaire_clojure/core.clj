@@ -53,10 +53,10 @@
                                        [(nth sd 47) (nth sd 41) (nth sd 36) (nth sd 32) (force-card-face-up (nth sd 29))]
                                        [(nth sd 46) (nth sd 40) (nth sd 35) (nth sd 31) (nth sd 28) (force-card-face-up (nth sd 26))]
                                        [(nth sd 45) (nth sd 39) (nth sd 34) (nth sd 30) (nth sd 27) (nth sd 25) (force-card-face-up (nth sd 24))]]
-                         :foundations [0 0 0 0]}
+                         :foundations [0 0 0 0]
+                         :initial-flips-of-round 8}
                         :moves-made 0
-                        :seen-fields []
-                        :initial-flip-count-at-start-of-round 8}]
+                        :seen-fields []}]
         game-state))))
 
 (comment
@@ -80,10 +80,10 @@
                                      [(nth sd 47) (nth sd 41) (nth sd 36) (nth sd 32) (force-card-face-up (nth sd 29))]
                                      [(nth sd 46) (nth sd 40) (nth sd 35) (nth sd 31) (nth sd 28) (force-card-face-up (nth sd 26))]
                                      [(nth sd 45) (nth sd 39) (nth sd 34) (nth sd 30) (nth sd 27) (nth sd 25) (force-card-face-up (nth sd 24))]]
-                       :foundations [0 0 0 0]}
+                       :foundations [0 0 0 0]
+                       :initial-flips-of-round 8}
                       :moves-made  0
-                      :seen-fields []
-                      :initial-flip-count-at-start-of-round 8}]
+                      :seen-fields []}]
       game-state))
   )
 ;; The result of this function is a map with three keys: :field, :moves-made, and :seen-fields
