@@ -47,7 +47,9 @@
       (= stock-count 0) ;; no cards in stock -- flip entire waste to stock
       (let [new-stock (mapv force-card-face-down (vec (reverse waste)))
             new-waste []
-            flip-times (max 0 (min (- initial-flips-of-round 1) (- (quot (count new-stock) 3) 1))) ;; how many times to flip three forward
+            ;; how many times to flip three forward
+            flip-times (if (= initial-flips-of-round 0) (max 0 (- (quot (count new-stock) 3) 1))
+                                                        (max 0 (min (- initial-flips-of-round 1) (- (quot (count new-stock) 3) 1))))
             new-field (assoc field :stock new-stock :waste new-waste :initial-flips-of-round flip-times)
             new-moves-made (inc moves-made)
             new-game-state (assoc game-state :field new-field :moves-made new-moves-made )]
