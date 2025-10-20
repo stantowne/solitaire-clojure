@@ -21,7 +21,7 @@
     ;; (println "new stock count: " (count new-stock))
     ;; (println "new waste count: " (count new-waste))
     (do
-      (println "flip-three-forward")
+      (when (:print-flip-three-forward config) (println "flip-three-forward"))
       (assoc game-state :field new-field :moves-made new-moves-made))))
 
 
