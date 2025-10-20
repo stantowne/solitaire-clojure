@@ -1,6 +1,7 @@
 (ns solitaire-clojure.core
   (:gen-class)
   (:require
+    [solitaire-clojure.config :refer [config]]
     [solitaire-clojure.print :refer [print-game-state]]
     [solitaire-clojure.helper-functions :refer [force-card-face-up]]
     [solitaire-clojure.moves :refer [move-a-card-from-pile-to-foundations
@@ -13,14 +14,6 @@
     [solitaire-clojure.flip :refer [flip]]))
 
 (defonce csv-reader-atom (atom nil))
-
-(def config
-  {:decks-filepath "test/resources/decks-made-2022-01-15-count-10000-dict.csv"
-   :first-deck-num 1 ; files are treated as 0 base
-   :num-of-decks 1 ;; do not exceed number of decks minus first-deck-num
-   :move-limit 200
-   :print-if-move-count-exceeds -1
-   :print-func-failure false})
 
 
 

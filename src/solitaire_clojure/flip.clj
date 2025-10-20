@@ -1,5 +1,6 @@
 (ns solitaire-clojure.flip
-  (:require [solitaire-clojure.helper-functions :refer [force-card-face-up force-card-face-down]]))
+  (:require [solitaire-clojure.helper-functions :refer [force-card-face-up force-card-face-down]])
+  (:require [solitaire-clojure.config :refer [config]]))
 
 
 
