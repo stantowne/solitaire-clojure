@@ -15,9 +15,7 @@
 
 (defonce csv-reader-atom (atom nil))
 
-
-
-(defn init-csv-reader [filepath first-deck-num] ;; "resources/decks-made-2022-01=15-count-10000-dict.csv"
+(defn init-csv-reader [filepath first-deck-num]
   (reset! csv-reader-atom (drop first-deck-num (csv/read-csv (io/reader filepath)))))
 
 (defn next-deck-from-csv []
@@ -80,7 +78,7 @@
       game-state))
   )
 ;; The result of this function is a map with three keys: :field, :moves-made, and :seen-fields
-;; :field is itself a map with four keys: :stock, :waste, :tableau, and :foundations
+;; :field is itself a map with five keys: :stock, :waste, :tableau, :foundations and :initial-flips-of-round
  ;; :stock is a vector of cards (maps with keys :suit, :value, and :face-up)
  ;; :waste is a vector of cards (maps with keys :suit, :value, and :face-up)
  ;; :tableau is a vector of 7 vectors, each representing a pile of cards
