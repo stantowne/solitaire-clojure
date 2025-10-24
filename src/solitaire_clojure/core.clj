@@ -70,7 +70,7 @@
 ;; :seen-fields is a set of previous fields to detect loops
 ;;
 
-(def game-state-atom (atom (deal-next-deck)))
+(def game-state-atom (atom nil))
 
 (defn game-over? [current-state]
   (not= (:game-result current-state) :in-progress))
@@ -107,11 +107,15 @@
     current-state
     (find-and-make-move current-state)))
 
-(defn play-game [initial-state]
-  (loop [current-state initial-state]
-    (if (game-over? current-state)
-      {:result (:game-result current-state)}
-      (recur (calculate-next-state current-state)))))
+(defn play-game []
+  (loop []
+    (if (game-over? @game-state-atom)
+      {:result (:game-result @game-state-atom)}
+      (do
+        (swap! game-state-atom calculate-next-state)
+        (recur)))))
+
+
 
 (defn -main
   "Main entry point for the Solitaire game"
@@ -121,8 +125,9 @@
          (loop [deck-number (:first-deck-num config)
                 record-of-results {:lost-limit-reached 0 :lost-field-repeated 0 :won 0}]
           (if (< deck-number (+ (:first-deck-num config) (:num-of-decks config)))
-            (let [game-state (deal-next-deck)
-                  result (play-game game-state)
+            (let [initial-game-state (deal-next-deck)
+                  _ (reset! game-state-atom initial-game-state)
+                  result (play-game)
                   updated-results
                     (cond
                     (= (:result result) :won) (update record-of-results :won inc)
