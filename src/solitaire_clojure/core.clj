@@ -56,7 +56,8 @@
                          :foundations [0 0 0 0]}
                         :moves-made 0
                         :seen-fields []
-                        :game-result :in-progress}]
+                        :game-result :in-progress
+                        :move-limit (:move-limit config)}] ;; added so that find-and-make-move is pure
         game-state))))
 
 
@@ -77,12 +78,12 @@
 
 (defn find-and-make-move
   ([current-state]
-   (let [{:keys [field moves-made seen-fields]} current-state]
+   (let [{:keys [field moves-made seen-fields move-limit]} current-state]
      (cond
        (= (reduce + (:foundations field)) 52)
        (assoc current-state :game-result :won)
 
-       (= moves-made (:move-limit config)) ;; impure
+       (= moves-made move-limit)
        (assoc current-state :game-result :lost-limit-reached)
 
        (some #(= % field) seen-fields)
