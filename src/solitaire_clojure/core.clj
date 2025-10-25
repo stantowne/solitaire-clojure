@@ -19,7 +19,7 @@
    :first-deck-num 0 ; files are treated as 0 base
    :num-of-decks 10000 ;; do not exceed number of decks minus first-deck-num
    :move-limit 200
-   :print-if-move-count-exceeds 200
+   :print-each-move false
    :print-func-failure false})
 
 
@@ -114,6 +114,8 @@
       {:result (:game-result @game-state-atom)}
       (do
         (swap! game-state-atom calculate-next-state)
+        (when (:print-each-move config)
+          (print-game-state @game-state-atom))
         (recur)))))
 
 
@@ -126,7 +128,8 @@
          (loop [deck-number (:first-deck-num config)
                 record-of-results {:lost-limit-reached 0 :lost-field-repeated 0 :won 0}]
           (if (< deck-number (+ (:first-deck-num config) (:num-of-decks config)))
-            (let [initial-game-state (deal-next-deck)
+            (let [initial-game-map (deal-next-deck)
+                  initial-game-state (assoc initial-game-map :deck-number deck-number)
                   _ (reset! game-state-atom initial-game-state)
                   result (play-game)
                   updated-results
