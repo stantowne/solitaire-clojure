@@ -116,9 +116,9 @@
 
       ;; 3. Game is not over, start the "get-input" loop
       (let [input (loop [] ;; This is the inner "input-validation" loop
-                    (println "\n<Enter> to make next move, (g)ive up on this game:")
+                    (println "\n<Enter> to make next move, (g)ive up on this game, e(x)it program:")
                     (let [in (read-line)]
-                      (if (or (= in "") (= in "g"))
+                      (if (or (= in "") (= in "g") (= in "x"))
                         in ;; Valid input, return it from the inner loop
                         (do
                           (println "Invalid input, please try again.")
@@ -133,6 +133,9 @@
 
           (= input "g")
           {:result :quit-by-user} ;; Quit the game
+
+          (= input "x")
+          {:result :exit-program}
           )))))
 
 (defn -main
@@ -174,6 +177,11 @@
                         (println (str "--- Deck " deck-number " skipped by user. ---"))
                         (update record-of-results :quit-by-user (fnil inc 0)))
 
+                      (= (:result result) :exit-program)
+                      (do
+                        (println (str "--- Exiting program at user request. Final results below. ---"))
+                        record-of-results)
+
                       :else
                         (do
                         (println "Unexpected result:" result)
@@ -181,6 +189,10 @@
 
             (when (= (:result result) :won)
               (spit "decks-won-clojure.txt" (str "\nDeck number " deck-number " won.") :append true))
-            (recur (inc deck-number) updated-results))
+
+            (if (= (:result result) :exit-program)
+              [deck-number updated-results]
+              (recur (inc deck-number) updated-results)))
+
             [deck-number record-of-results]))]
-            (println "Record of Results:" final-results)))
+  (println "Record of Results:" final-results)))
