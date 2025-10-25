@@ -101,27 +101,84 @@
         (swap! game-state-atom calculate-next-state)
         (recur)))))
 
+(defn play-game-interactive []
+  (println "--- New Game (Interactive) ---")
+  (loop [] ;; This is the main "per-move" loop
+
+    ;; 1. Print the current state *once*
+    (print-game-state @game-state-atom)
+
+    ;; 2. Check if the game is over
+    (if (game-over? @game-state-atom)
+      (do
+        (println "--- Game Over ---")
+        {:result (:game-result @game-state-atom)})
+
+      ;; 3. Game is not over, start the "get-input" loop
+      (let [input (loop [] ;; This is the inner "input-validation" loop
+                    (println "\n<Enter> to make next move, (g)ive up on this game:")
+                    (let [in (read-line)]
+                      (if (or (= in "") (= in "g"))
+                        in ;; Valid input, return it from the inner loop
+                        (do
+                          (println "Invalid input, please try again.")
+                          (recur)))))] ;; This recur *only* repeats the input prompt
+
+        ;; 4. We now have valid input ("m" or "g"), so we act
+        (cond
+          (= input "")
+          (do
+            (swap! game-state-atom calculate-next-state)
+            (recur)) ;; This recur goes back to the main "per-move" loop
+
+          (= input "g")
+          {:result :quit-by-user} ;; Quit the game
+          )))))
+
 (defn -main
   "Main entry point for the Solitaire game"
   []
   (init-csv-reader (:decks-filepath config) (:first-deck-num config))
   (let [[_ final-results]
          (loop [deck-number (:first-deck-num config)
-                record-of-results {:lost-limit-reached 0 :lost-field-repeated 0 :won 0}]
+                record-of-results {:lost-limit-reached 0 :lost-field-repeated 0 :won 0}] ;; quite-by-user not initialized
           (if (< deck-number (+ (:first-deck-num config) (:num-of-decks config)))
             (let [initial-game-map (deal-next-deck)
                   initial-game-state (assoc initial-game-map :deck-number deck-number)
                   _ (reset! game-state-atom initial-game-state)
-                  result (play-game)
+                  result (if (:interactive-mode? config)
+                           (play-game-interactive)
+                           (play-game))
                   updated-results
                     (cond
-                    (= (:result result) :won) (update record-of-results :won inc)
-                    (= (:result result) :lost-limit-reached) (update record-of-results :lost-limit-reached inc)
-                    (= (:result result) :lost-field-repeated) (update record-of-results :lost-field-repeated inc)
-                    :else
+                      (= (:result result) :won)
                       (do
+                        (when (:interactive-mode? config)
+                          (println (str "--- Deck " deck-number " WON. ---")))
+                        (update record-of-results :won inc))
+
+                      (= (:result result) :lost-limit-reached)
+                      (do
+                        (when (:interactive-mode? config)
+                          (println (str "--- Deck " deck-number " LOST (move limit). ---")))
+                        (update record-of-results :lost-limit-reached inc))
+
+                      (= (:result result) :lost-field-repeated)
+                      (do
+                        (when (:interactive-mode? config)
+                          (println (str "--- Deck " deck-number " LOST (loop detected). ---")))
+                        (update record-of-results :lost-field-repeated inc))
+
+                      (= (:result result) :quit-by-user)
+                      (do
+                        (println (str "--- Deck " deck-number " skipped by user. ---"))
+                        (update record-of-results :quit-by-user (fnil inc 0)))
+
+                      :else
+                        (do
                         (println "Unexpected result:" result)
                         record-of-results))]
+
             (when (= (:result result) :won)
               (spit "decks-won-clojure.txt" (str "\nDeck number " deck-number " won.") :append true))
             (recur (inc deck-number) updated-results))
