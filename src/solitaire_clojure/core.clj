@@ -8,20 +8,12 @@
                                              move-a-card-from-waste-to-foundations
                                              move-a-card-from-waste-to-pile
                                              flip]]
+            [solitaire-clojure.config :refer [config]]
             [solitaire-clojure.move-partial-pile :refer [move-partial-pile]]
             [solitaire-clojure.move-entire-pile :refer [move-entire-pile]]))
 
 
 (defonce csv-reader-atom (atom nil))
-
-(def config
-  {:decks-filepath "test/resources/decks-made-2022-01-15-count-10000-dict.csv"
-   :first-deck-num 0 ; files are treated as 0 base
-   :num-of-decks 10000 ;; do not exceed number of decks minus first-deck-num
-   :move-limit 200
-   :print-each-move false
-   :print-func-failure false})
-
 
 
 (defn init-csv-reader [filepath first-deck-num] ;; "resources/decks-made-2022-01=15-count-10000-dict.csv"
