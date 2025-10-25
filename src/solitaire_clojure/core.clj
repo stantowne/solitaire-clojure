@@ -47,21 +47,12 @@
                                        [(nth sd 45) (nth sd 39) (nth sd 34) (nth sd 30) (nth sd 27) (nth sd 25) (force-card-face-up (nth sd 24))]]
                          :foundations [0 0 0 0]}
                         :moves-made 0
-                        :seen-fields []
+                        :seen-fields [] ;; all prior fields. used to detect loops.
                         :game-result :in-progress
                         :move-limit (:move-limit config)}] ;; added so that find-and-make-move is pure
         game-state))))
 
 
-;; The result of this function is a map with three keys: :field, :moves-made, and :seen-fields
-;; :field is itself a map with four keys: :stock, :waste, :tableau, and :foundations
- ;; :stock is a vector of cards (maps with keys :suit, :value, and :face-up)
- ;; :waste is a vector of cards (maps with keys :suit, :value, and :face-up)
- ;; :tableau is a vector of 7 vectors, each representing a pile of cards
- ;; :foundations is a vector of 4 integers, each representing the last card value in each foundation pile
-;; :moves-made is an integer, representing the number of moves made so far
-;; :seen-fields is a set of previous fields to detect loops
-;;
 
 (def game-state-atom (atom nil))
 
