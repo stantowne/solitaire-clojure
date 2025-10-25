@@ -93,15 +93,13 @@
 
 (defn play-game []
   (loop []
+    (when (:print-each-move config)
+      (print-game-state @game-state-atom))
     (if (game-over? @game-state-atom)
       {:result (:game-result @game-state-atom)}
       (do
         (swap! game-state-atom calculate-next-state)
-        (when (:print-each-move config)
-          (print-game-state @game-state-atom))
         (recur)))))
-
-
 
 (defn -main
   "Main entry point for the Solitaire game"
