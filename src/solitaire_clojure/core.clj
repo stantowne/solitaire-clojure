@@ -10,11 +10,12 @@
                                              flip]]
             [solitaire-clojure.config :refer [config]]
             [solitaire-clojure.move-partial-pile :refer [move-partial-pile]]
-            [solitaire-clojure.move-entire-pile :refer [move-entire-pile]]))
+            [solitaire-clojure.move-entire-pile :refer [move-entire-pile]]
+            [solitaire-clojure.state :refer [game-state-atom]]
+            [solitaire-clojure.ui :as ui]))
 
 
 (defonce csv-reader-atom (atom nil))
-
 
 (defn init-csv-reader [filepath first-deck-num] ;; "resources/decks-made-2022-01=15-count-10000-dict.csv"
   (reset! csv-reader-atom (drop first-deck-num (csv/read-csv (io/reader filepath)))))
@@ -52,9 +53,6 @@
                         :move-limit (:move-limit config)}] ;; added so that find-and-make-move is pure
         game-state))))
 
-
-
-(def game-state-atom (atom nil))
 
 (defn game-over? [current-state]
   (not= (:game-result current-state) :in-progress))
@@ -142,6 +140,8 @@
   "Main entry point for the Solitaire game"
   []
   (init-csv-reader (:decks-filepath config) (:first-deck-num config))
+  (when (:interactive-mode? config)
+    (ui/launch-ui))
   (let [[_ final-results]
          (loop [deck-number (:first-deck-num config)
                 record-of-results {:lost-limit-reached 0 :lost-field-repeated 0 :won 0}] ;; quite-by-user not initialized
@@ -195,4 +195,5 @@
               (recur (inc deck-number) updated-results)))
 
             [deck-number record-of-results]))]
-  (println "Record of Results:" final-results)))
+  (println "Record of Results:" final-results)
+  (System/exit 0)))

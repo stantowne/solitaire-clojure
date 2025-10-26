@@ -6,6 +6,7 @@
   :dependencies [
                  [org.clojure/clojure "1.11.1"]
                  [org.clojure/data.csv "1.0.1"]
+                 [cljfx "1.9.5"]
                  ]
   :repl-options {:init-ns solitaire-clojure.core}
   :main solitaire-clojure.core)
