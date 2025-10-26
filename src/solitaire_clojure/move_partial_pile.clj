@@ -15,7 +15,8 @@
         partial-move (find-partial-move tableau foundations)
         {:keys [from-pile-num to-pile-num card-to-move-up]} partial-move]
     (if (and (some? from-pile-num) (some? to-pile-num) (some? card-to-move-up))
-      (let [new-foundations (update foundations (:suit card-to-move-up) inc)
+      (let [new-foundation (conj (nth foundations (:suit card-to-move-up)) card-to-move-up)
+            new-foundations (assoc foundations (:suit card-to-move-up) new-foundation)
             from-pile (nth tableau from-pile-num)
             new-from-pile (force-last-card-pile-face-up (subvec from-pile 0 (index-of from-pile card-to-move-up)))
             cards-to-move-over (subvec from-pile (inc (index-of from-pile card-to-move-up)))
@@ -44,7 +45,7 @@
                               to-pile-num)))
                         (range 7))]
             :when (and to-pile-num  ; 7. Only proceed is a valid destination pile was found.
-                       (= (:value card) (+ 1 (nth foundations (:suit card)))))]
+                       (= (:value card) ((fnil inc 0) (:value (last (nth foundations (:suit card)))))))]
         {:from-pile-num from-pile-num
          :to-pile-num to-pile-num
          :card-to-move-up card})))

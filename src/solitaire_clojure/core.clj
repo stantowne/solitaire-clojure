@@ -46,7 +46,7 @@
                                        [(nth sd 47) (nth sd 41) (nth sd 36) (nth sd 32) (force-card-face-up (nth sd 29))]
                                        [(nth sd 46) (nth sd 40) (nth sd 35) (nth sd 31) (nth sd 28) (force-card-face-up (nth sd 26))]
                                        [(nth sd 45) (nth sd 39) (nth sd 34) (nth sd 30) (nth sd 27) (nth sd 25) (force-card-face-up (nth sd 24))]]
-                         :foundations [0 0 0 0]}
+                         :foundations [[] [] [] []]} ;; Clubs, Diamonds, Spades, Hearts
                         :moves-made 0
                         :seen-fields [] ;; all prior fields. used to detect loops.
                         :game-result :in-progress
@@ -61,7 +61,7 @@
   ([current-state]
    (let [{:keys [field moves-made seen-fields move-limit]} current-state]
      (cond
-       (= (reduce + (:foundations field)) 52)
+       (= (reduce + (map count (:foundations field))) 52)
        (assoc current-state :game-result :won)
 
        (= moves-made move-limit)

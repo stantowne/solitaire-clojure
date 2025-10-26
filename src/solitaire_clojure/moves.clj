@@ -52,9 +52,10 @@
       (let [waste-last-card (last waste)
             suit-number (:suit waste-last-card)
             value (:value waste-last-card)
-            foundation-value (foundations suit-number)]
-        (if (and (not (> value max-value-to-move)) (= value (inc foundation-value)))
-          (let [new-foundations (update foundations suit-number inc)
+            foundation-value (:value (last (foundations suit-number)))]
+        (if (and (not (> value max-value-to-move)) (= value ((fnil inc 0) foundation-value)))
+          (let [new-foundation (conj (nth foundations suit-number) waste-last-card)
+                new-foundations (assoc foundations suit-number new-foundation)
                 new-waste (vec (butlast waste))
                 new-field (assoc field :foundations new-foundations :waste new-waste)
                 new-moves-made (inc moves-made)]
@@ -74,22 +75,23 @@
                (let [pile-last-card (last pile)
                      suit-number (:suit pile-last-card)
                      value (:value pile-last-card)
-                     foundation-value (foundations suit-number)]
-                  (when (and (= value (inc foundation-value))
+                     foundation-value (:value (last (foundations suit-number)))]
+                  (when (and (= value ((fnil inc 0) foundation-value))
                              (<= value do-not-move-above)
                              (or
                                 (< value no-final-test-needed-below)
 
-                                (and (>= (foundations (mod (+ suit-number 1) 4)) (- value 2))
+                                (and (>= (or (:value (last (foundations (mod (+ suit-number 1) 4)))) 0) (- value 2))
                                      (card-in-tableau-face-up tableau {:suit (mod (+ suit-number 3) 4) :value (- value 1) :face-up true}))
 
-                                (and (>= (foundations (mod (+ suit-number 3) 4)) (- value 2))
+                                (and (>= (or (:value (last (foundations (mod (+ suit-number 3) 4)))) 0) (- value 2))
                                      (card-in-tableau-face-up tableau {:suit (mod (+ suit-number 1) 4) :value (- value 1) :face-up true}))
 
-                                (and (>= (foundations (mod (+ suit-number 1) 4)) (- value 2))
-                                     (>= (foundations (mod (+ suit-number 3) 4)) (- value 2)))))
+                                (and (>= (or (:value (last (foundations (mod (+ suit-number 1) 4)))) 0) (- value 2))
+                                     (>= (or (:value (last (foundations (mod (+ suit-number 3) 4)))) 0) (- value 2)))))
 
-                    (let [new-foundations (update foundations suit-number inc)
+                    (let [new-foundation (conj (nth foundations suit-number) pile-last-card)
+                          new-foundations (assoc foundations suit-number new-foundation)
                           new-pile (vec (butlast pile))
                           new-pile (if (seq new-pile)
                                      (force-last-card-pile-face-up new-pile)
