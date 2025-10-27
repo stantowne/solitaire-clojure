@@ -54,10 +54,10 @@
   (println "Stock:" (clojure.string/join " " (map card-str stock)))
   (println "Waste:" (clojure.string/join " " (map card-str waste)))
   (println (str "Foundations: "
-                (nth foundations 0) " Clubs; "
-                (nth foundations 1) " Diamonds; "
-                (nth foundations 2) " Spades; "
-                (nth foundations 3) " Hearts"))
+                (:value (last (nth foundations 0))) " Clubs; "
+                (:value (last (nth foundations 1))) " Diamonds; "
+                (:value (last (nth foundations 2))) " Spades; "
+                (:value (last (nth foundations 3))) " Hearts"))
   (println "Tableau:")
   (print-tableau tableau)
   (println)
