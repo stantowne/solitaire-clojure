@@ -50,3 +50,13 @@
 (defn index-of
   [coll target]
   (first (keep-indexed (fn [idx item] (when (= item target) idx)) coll)))
+
+(defn count-face-up-cards
+  "counts the number of face-up cards in a pile"
+  [pile]
+  (count (filter :face-up pile)))
+
+(defn count-face-up-cards-piles
+  "counts the number of face-up cards in tableau"
+  [piles]
+  (reduce + (map count-face-up-cards piles)))

@@ -3,7 +3,7 @@
   (:require [clojure.data.csv :as csv]
             [clojure.java.io :as io]
             [solitaire-clojure.print :refer [print-game-state]]
-            [solitaire-clojure.helper-functions :refer [force-card-face-up]]
+            [solitaire-clojure.helper-functions :refer [force-card-face-up count-face-up-cards-piles]]
             [solitaire-clojure.moves :refer [move-a-card-from-pile-to-foundations
                                              move-a-card-from-waste-to-foundations
                                              move-a-card-from-waste-to-pile
@@ -61,7 +61,7 @@
   ([current-state]
    (let [{:keys [field moves-made seen-fields move-limit]} current-state]
      (cond
-       (= (reduce + (map count (:foundations field))) 52)
+       (= (+ (count-face-up-cards-piles (:foundations field)) (count-face-up-cards-piles (:tableau field))) 52)
        (assoc current-state :game-result :won)
 
        (= moves-made move-limit)
@@ -157,19 +157,19 @@
                       (= (:result result) :won)
                       (do
                         (when (:interactive-mode? config)
-                          (println (str "--- Deck " deck-number " WON. ---")))
+                          (println (str "--- Deck " deck-number " Won. ---")))
                         (update record-of-results :won inc))
 
                       (= (:result result) :lost-limit-reached)
                       (do
                         (when (:interactive-mode? config)
-                          (println (str "--- Deck " deck-number " LOST (move limit). ---")))
+                          (println (str "--- Deck " deck-number " Lost (move limit). ---")))
                         (update record-of-results :lost-limit-reached inc))
 
                       (= (:result result) :lost-field-repeated)
                       (do
                         (when (:interactive-mode? config)
-                          (println (str "--- Deck " deck-number " LOST (loop detected). ---")))
+                          (println (str "--- Deck " deck-number " Lost (loop detected). ---")))
                         (update record-of-results :lost-field-repeated inc))
 
                       (= (:result result) :quit-by-user)
