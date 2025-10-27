@@ -23,24 +23,24 @@
     :black))
 
 
-(defn dif-color
+(defn dif-color?
   "are the two cards of different colors?"
   [card1 card2]
   (not= (color card1) (color card2)))
 
-(defn same-color
+(defn same-color?
   "are the two cards of the same color?"
   [card1 card2]
   (= (color card1) (color card2)))
 
-(defn sister-card
+(defn sister-card?
   [card1 card2]
   (and (= (:value card1) (:value card2))
        (= (color card1) (color card2))
        (not (= (:suit card1) (:suit card2)))))
 
 
-(defn card-in-tableau-face-up
+(defn card-in-tableau-face-up?
   "accept a tableau (a vector of piles) and a card; return true if the card is face up in any pile"
   [tableau card]
   (some (fn [pile]

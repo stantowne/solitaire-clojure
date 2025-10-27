@@ -1,6 +1,6 @@
 (ns solitaire-clojure.moves
   (:require [solitaire-clojure.helper-functions
-             :refer [force-card-face-up force-last-card-pile-face-up force-card-face-down dif-color card-in-tableau-face-up]]))
+             :refer [force-card-face-up force-last-card-pile-face-up force-card-face-down dif-color? card-in-tableau-face-up?]]))
 
 (defn flip
   "returns a new map with three (or fewer) cards flipped from stock to waste or the entire waste flipped to stock;
@@ -82,10 +82,10 @@
                                 (< value no-final-test-needed-below)
 
                                 (and (>= (or (:value (last (foundations (mod (+ suit-number 1) 4)))) 0) (- value 2))
-                                     (card-in-tableau-face-up tableau {:suit (mod (+ suit-number 3) 4) :value (- value 1) :face-up true}))
+                                     (card-in-tableau-face-up? tableau {:suit (mod (+ suit-number 3) 4) :value (- value 1) :face-up true}))
 
                                 (and (>= (or (:value (last (foundations (mod (+ suit-number 3) 4)))) 0) (- value 2))
-                                     (card-in-tableau-face-up tableau {:suit (mod (+ suit-number 1) 4) :value (- value 1) :face-up true}))
+                                     (card-in-tableau-face-up? tableau {:suit (mod (+ suit-number 1) 4) :value (- value 1) :face-up true}))
 
                                 (and (>= (or (:value (last (foundations (mod (+ suit-number 1) 4)))) 0) (- value 2))
                                      (>= (or (:value (last (foundations (mod (+ suit-number 3) 4)))) 0) (- value 2)))))
@@ -137,7 +137,7 @@
             :else
             (let [pile-last-card (last pile)]
               (if (and (:face-up pile-last-card) ;; last card in pile must be face up (probably unnecessary)
-                       (dif-color pile-last-card waste-last-card)
+                       (dif-color? pile-last-card waste-last-card)
                        (= (:value pile-last-card) (inc (:value waste-last-card))))
                 (let [new-pile (vec (conj pile waste-last-card))
                       new-tableau (assoc tableau pile-num new-pile)

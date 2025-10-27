@@ -1,5 +1,5 @@
 (ns solitaire-clojure.move-entire-pile
-  (:require [solitaire-clojure.helper-functions :refer [dif-color sister-card force-last-card-pile-face-up]]))
+  (:require [solitaire-clojure.helper-functions :refer [dif-color? sister-card? force-last-card-pile-face-up]]))
 
 
 (defn sister-card-in-tableau? [card tableau]
@@ -7,7 +7,7 @@
     (fn [pile]
       (some
         (fn [c]
-          (and (:face-up c) (sister-card c card)))
+          (and (:face-up c) (sister-card? c card)))
         pile))
     tableau))
 
@@ -62,7 +62,7 @@
                           (empty? to-pile))
                      (and (not (empty? to-pile))
                           (= (:value (last to-pile)) (inc (:value (first from-pile-up-cards))))
-                          (dif-color (first from-pile-up-cards) (last to-pile)))))]
+                          (dif-color? (first from-pile-up-cards) (last to-pile)))))]
     {:from-pile-num from-pile-num
      :from-pile from-pile
      :to-pile-num to-pile-num

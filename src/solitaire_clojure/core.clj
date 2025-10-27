@@ -91,7 +91,7 @@
 
 (defn play-game []
   (loop []
-    (when (:print-each-move config)
+    (when (:print-each-move? config)
       (print-game-state @game-state-atom))
     (if (game-over? @game-state-atom)
       {:result (:game-result @game-state-atom)}
