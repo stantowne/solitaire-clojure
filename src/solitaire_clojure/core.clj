@@ -89,6 +89,20 @@
     current-state
     (find-and-make-move current-state)))
 
+(defn back-one-move [current-state]
+  (let [{:keys [seen-fields moves-made]} current-state]
+    (if (empty? seen-fields)
+      current-state
+      (let [previous-field (last seen-fields)
+            previous-seen-fields (vec (butlast seen-fields))
+            previous-moves-made (dec moves-made)
+            previous-state (assoc current-state
+                             :field previous-field
+                             :seen-fields previous-seen-fields
+                             :moves-made previous-moves-made
+                             :game-result :in-progress)]
+        previous-state))))
+
 (defn play-game []
   (loop []
     (when (:print-each-move? config)
@@ -114,20 +128,25 @@
 
       ;; 3. Game is not over, start the "get-input" loop
       (let [input (loop [] ;; This is the inner "input-validation" loop
-                    (println "\n<Enter> to make next move, (g)ive up on this game, e(x)it program:")
+                    (println "\n<Enter> to make next move, go (b)ack one move, (g)ive up on this game, e(x)it program:")
                     (let [in (read-line)]
-                      (if (or (= in "") (= in "g") (= in "x"))
+                      (if (or (= in "") (= in "g") (= in "x") (= in "b"))
                         in ;; Valid input, return it from the inner loop
                         (do
                           (println "Invalid input, please try again.")
                           (recur)))))] ;; This recur *only* repeats the input prompt
 
-        ;; 4. We now have valid input ("m" or "g"), so we act
+        ;; 4. We now have valid input ("" or "g" or "x" or "b"), so we act
         (cond
           (= input "")
           (do
             (swap! game-state-atom calculate-next-state)
-            (recur)) ;; This recur goes back to the main "per-move" loop
+            (recur)) ;; This recur goes back to the main "per-move" loop in a new state
+
+          (= input "b")
+          (do
+            (swap! game-state-atom back-one-move)
+            (recur)) ;; This recur goes back to the main "per-move" loop in the prior state
 
           (= input "g")
           {:result :quit-by-user} ;; Quit the game
