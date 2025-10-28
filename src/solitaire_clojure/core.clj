@@ -6,8 +6,8 @@
             [solitaire-clojure.helper-functions :refer [force-card-face-up count-face-up-cards-piles]]
             [solitaire-clojure.moves :refer [move-a-card-from-pile-to-foundations
                                              move-a-card-from-waste-to-foundations
-                                             move-a-card-from-waste-to-pile
-                                             flip]]
+                                             move-a-card-from-waste-to-pile]]
+            [solitaire-clojure.flip :refer [flip]]
             [solitaire-clojure.config :refer [config]]
             [solitaire-clojure.move-partial-pile :refer [move-partial-pile]]
             [solitaire-clojure.move-entire-pile :refer [move-entire-pile]]
