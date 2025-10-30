@@ -2,53 +2,36 @@
   (:require [cljfx.api :as fx]
             [solitaire-clojure.state :refer [game-state-atom]]
             [clojure.java.io :as io]
-            [clojure.string :as str]))
-
+            [clojure.string :as str]
+            [solitaire-clojure.logic :as game]
+            [solitaire-clojure.config :refer [config]]
+            [solitaire-clojure.print :refer [print-game-state]]))
 
 (def card-width 75)
 (def card-height 115)
 (def card-v-overlap 30)
 (def card-h-overlap 20)
 
-;; This map translates your suit numbers to their file letters
 (def suit->char
-  {0 "C"
-   1 "D"
-   2 "S"
-   3 "H"})
+  {0 "C" 1 "D" 2 "S" 3 "H"})
 
 (defn card->image-path
-  "Translates a card map into its corresponding image file path."
   [card]
   (if-let [{:keys [suit value face-up]} card]
-    ;; It's a card
     (if face-up
-      ;; Card is face up, build the filename
-      (let [val-str (str/replace (format "%2d" value) " " "0"); Formats 1 -> "01"
+      (let [val-str (str/replace (format "%2d" value) " " "0")
             suit-str (suit->char suit)]
         (str "images/cards/std/" val-str suit-str ".png"))
-
-      ;; Card is face down
       "images/cards/std/00.png")
+    nil))
 
-    ;; It's not a card (it's nil), so it's an empty spot
-    nil)) ; We'll handle 'nil' by just not drawing anything
-    ;
 (defn card-view
-  "Returns a cljfx component for a single card or an empty slot."
   [card]
   (if-let [image-path (card->image-path card)]
-    ;; Case 1: We have a card, show the image and SCALE IT
     {:fx/type :image-view
      :fit-width card-width
      :fit-height card-height
-     :image {:fx/type :image
-
-             ;; --- THIS IS THE FIX ---
-             ;; Just pass the string path, not the URL object
-             :url image-path}}
-
-    ;; Case 2: No card (nil), show the empty slot placeholder
+     :image {:fx/type :image :url image-path}}
     {:fx/type :rectangle
      :width card-width
      :height card-height
@@ -58,110 +41,155 @@
      :arc-height 10}))
 
 (defn waste-pile-view
-  "Returns a cljfx component for the splayed Waste pile."
   [pile]
   {:fx/type :stack-pane
    :alignment :top-left
-   ;; We always include the base slot, then add cards on top
    :children (into [(card-view nil)]
                    (map-indexed
                      (fn [idx card]
                        (assoc (card-view card)
-                         ;; Splay horizontally
                          :translate-x (* idx card-h-overlap)))
-                     ;; Only show the last 3 cards
                      (take-last 3 pile)))})
 
 (defn tableau-pile-view
-  "Returns a cljfx component for a single splayed Tableau pile."
   [pile]
   {:fx/type :stack-pane
-   ;; Aligns all children to the top-left of the stack
    :alignment :top-left
-   :children (into [(card-view nil)] ; Always start with the empty base slot
+   :children (into [(card-view nil)]
                    (map-indexed
                      (fn [idx card]
-                       ;; (card-view card) returns the image map.
-                       ;; We 'assoc' :translate-y to offset it.
                        (assoc (card-view card)
                          :translate-y (* idx card-v-overlap)))
                      pile))})
 
-;; --- 1. The View (What the UI looks like) ---
-;; This function is like a template. It takes the current
-;; game state map and describes what UI to show.
+;; --- NEW: A HELPER FOR STYLING BUTTONS ---
+(defn button-view [text event disabled?]
+  {:fx/type :button
+   :text text
+   :pref-width 100
+   :on-action event
+   :disable disabled?})
+
+;; --- NEW: THE MAIN EVENT HANDLER ---
+(defn- event-handler [event]
+  (case (:event/type event)
+    :next-move
+    (swap! game-state-atom game/calculate-next-state) ;
+
+    :back-one-move
+    (swap! game-state-atom game/back-one-move) ;
+
+    ;; --- THIS LOGIC IS NEW ---
+    :next-deck ; (Renamed from :give-up)
+    (let [current-deck-num (:deck-number @game-state-atom) ;
+          next-deck-num (inc current-deck-num)
+          deck-limit (+ (:first-deck-num config) (:num-of-decks config))] ;
+      (if (< next-deck-num deck-limit)
+        ;; We have more decks to play
+        (let [next-deck (game/deal-next-deck)] ;
+          (if next-deck
+            (reset! game-state-atom (assoc next-deck :deck-number next-deck-num)) ;
+            ;; Ran out of decks in the CSV file
+            (swap! game-state-atom assoc :game-result :no-more-decks))) ;
+        ;; Reached the configured deck limit
+        (swap! game-state-atom assoc :game-result :no-more-decks))) ;
+
+    :exit-program
+    (System/exit 0)) ;
+
+  (when (:print-each-move? config)
+    (print-game-state @game-state-atom)))
+
+  ;; After any event, print the new state to the console
+  (when (:print-each-move? config)
+    (print-game-state @game-state-atom))
+
+;; --- UPDATED: THE ROOT LAYOUT ---
 (defn root-view
   "Describes the entire UI window"
-  [{:keys [deck-number moves-made field]}]
-  ;; --- 1. Get :waste from the field ---
-  (let [{:keys [stock foundations tableau waste]} field]
+  [{:keys [deck-number moves-made field game-result]}]
+  (let [{:keys [stock foundations tableau waste]} field
+        game-is-over (not= :in-progress game-result)]
     {:fx/type :stage
      :showing true
      :title "Solitaire Monitor"
-     :width 650
+     :width 800
      :height 900
      :on-close-request (fn [_] (System/exit 0))
      :scene {:fx/type :scene
-             :root {:fx/type :v-box
+             :root {:fx/type :h-box
                     :padding 20
                     :spacing 10
                     :children [
-                               ;; ... (labels are unchanged) ...
-                               {:fx/type :label
-                                :text (str "Deck: " deck-number)}
-                               {:fx/type :label
-                                :text (str "Moves: " moves-made)}
+                               {:fx/type :v-box
+                                :spacing 10
+                                :children (->> [
+                                                {:fx/type :label
+                                                 :text (str "Deck: " deck-number)} ;
+                                                {:fx/type :label
+                                                 :text (str "Moves: " moves-made)} ;
 
-                               {:fx/type :grid-pane
+                                                (when game-is-over
+                                                  {:fx/type :label
+                                                   :style {:-fx-font-weight :bold
+                                                           :-fx-text-fill :red}
+                                                   :text (str "GAME " (clojure.string/upper-case (name game-result)))})
+
+                                                (button-view "Next Move" {:event/type :next-move} game-is-over) ;
+                                                (button-view "Back" {:event/type :back-one-move} game-is-over) ;
+
+                                                ;; --- 1. RENAMED & DISABLED ---
+                                                (button-view "Next Deck" {:event/type :next-deck} game-is-over) ;
+
+                                                (button-view "Exit" {:event/type :exit-program} false)] ;
+                                               (remove nil?)
+                                               (vec))}
+
+                               {:fx/type :grid-pane ;
                                 :hgap 10
                                 :vgap 20
                                 :children (let [
-                                                ;; --- ROW 0 ---
-                                                stock-pile (assoc (card-view (last stock))
-                                                             :grid-pane/column 0
-                                                             :grid-pane/row 0)
+                                                ;; --- 2. STOCK PILE UPDATED ---
+                                                stock-pile (assoc {:fx/type :v-box
+                                                                   :alignment :center
+                                                                   :spacing 5
+                                                                   :children [{:fx/type :label :text (str (count stock))}
+                                                                              (card-view (last stock))]} ;
+                                                             :grid-pane/column 0 :grid-pane/row 0)
 
-                                                ;; --- 2. REPLACE waste-slot ---
-                                                waste-pile (assoc (waste-pile-view waste)
-                                                             :grid-pane/column 1
-                                                             :grid-pane/row 0
+                                                ;; --- 3. WASTE PILE UPDATED ---
+                                                waste-pile (assoc {:fx/type :v-box
+                                                                   :alignment :center
+                                                                   :spacing 5
+                                                                   :children [{:fx/type :label :text (str (count waste))}
+                                                                              (waste-pile-view waste)]} ;
+                                                             :grid-pane/column 1 :grid-pane/row 0
                                                              :grid-pane/column-span 2)
 
                                                 foundation-piles (map-indexed
                                                                    (fn [idx pile]
                                                                      (assoc (card-view (last pile))
-                                                                       :grid-pane/column (+ idx 3)
-                                                                       :grid-pane/row 0))
+                                                                       :grid-pane/column (+ idx 3) :grid-pane/row 0)) ;
                                                                    foundations)
-
-                                                ;; --- ROW 1 ---
                                                 tableau-piles (map-indexed
                                                                 (fn [idx pile]
                                                                   (assoc (tableau-pile-view pile)
-                                                                    :grid-pane/column idx
-                                                                    :grid-pane/row 1))
+                                                                    :grid-pane/column idx :grid-pane/row 1)) ;
                                                                 tableau)]
-
-                                            ;; --- 3. UPDATE concat list ---
-                                            (vec (concat [stock-pile waste-pile] ;<-- Use waste-pile
+                                            (vec (concat [stock-pile waste-pile]
                                                          foundation-piles
-                                                         tableau-piles)))}
+                                                         tableau-piles)))} ;
                                ]}}}))
-;; --- 2. The Renderer (The cljfx "engine") ---
-;; This creates the cljfx system that knows how to
-;; "render" your view.
+
+;; --- UPDATED: THE RENDERER (to handle events) ---
 (def renderer
   (fx/create-renderer
-    ;; We tell the renderer to use our root-view function
-    ;; as its main template.
-    :middleware (fx/wrap-map-desc root-view)))
+    ;; 1. The :middleware tells cljfx to use root-view as the blueprint
+    :middleware (fx/wrap-map-desc root-view)
 
-;; --- 3. The Launcher (The "start" function) ---
-;; This is the one function we will call from core.clj.
+    ;; 2. The :opts map is where you tell cljfx which function handles events
+    :opts {:fx.opt/map-event-handler event-handler}))
+
+;; --- UPDATED: THE LAUNCHER (to use new renderer) ---
 (defn launch-ui []
-  ;; This is the magic line. It tells cljfx to:
-  ;; 1. "mount" the renderer.
-  ;; 2. "watch" the game-state-atom.
-  ;; 3. Anytime game-state-atom changes, automatically
-  ;;    re-run our root-view function with the new data.
   (fx/mount-renderer game-state-atom renderer))
