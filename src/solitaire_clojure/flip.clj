@@ -1,6 +1,5 @@
 (ns solitaire-clojure.flip
-  (:require [solitaire-clojure.helper-functions
-             :refer [force-card-face-up force-card-face-down]]))
+  (:require [solitaire-clojure.helper-functions :as helper]))
 
 
 (defn flip
@@ -21,7 +20,7 @@
         (assoc game-state :moves-made new-moves-made))
 
       (= stock-count 0) ;; no cards in stock
-      (let [new-stock (mapv force-card-face-down (vec (reverse waste)))
+      (let [new-stock (mapv helper/force-card-face-down (vec (reverse waste)))
             new-waste []
             new-field (assoc field :stock new-stock :waste new-waste)
             new-moves-made (inc moves-made)]
@@ -29,14 +28,14 @@
 
       (> stock-count 2) ;; three or more cards in stock
       (let [new-stock (subvec stock 0 (- stock-count 3))
-            new-waste (vec (concat waste (map force-card-face-up (reverse (subvec stock (- stock-count 3) stock-count)))))
+            new-waste (vec (concat waste (map helper/force-card-face-up (reverse (subvec stock (- stock-count 3) stock-count)))))
             new-field (assoc field :stock new-stock :waste new-waste)
             new-moves-made (inc moves-made)]
         (assoc game-state :field new-field :moves-made new-moves-made))
 
       :else ;; only 1 or 2 cards in stock
       (let [new-stock []
-            new-waste (vec (concat waste (map force-card-face-up (reverse stock))))
+            new-waste (vec (concat waste (map helper/force-card-face-up (reverse stock))))
             new-field (assoc field :stock new-stock :waste new-waste)
             new-moves-made (inc moves-made)]
         (assoc game-state :field new-field :moves-made new-moves-made)))))
