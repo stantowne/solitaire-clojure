@@ -75,7 +75,7 @@
   "Prints a Solitaire tableau column-wise."
   [tableau]
   ;; 1. Find the height of the tallest column.
-  (let [max-height (apply max (map count tableau))]
+  (let [max-height (apply max 0 (map count tableau))]
     ;; 2. Loop for each horizontal row to be printed.
     (println "            0     1     2     3     4     5     6")
     (doseq [row-index (range max-height)]
