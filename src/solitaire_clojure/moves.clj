@@ -1,6 +1,5 @@
 (ns solitaire-clojure.moves
-  (:require [solitaire-clojure.helper-functions
-             :refer [force-last-card-pile-face-up dif-color? card-in-tableau-face-up?]]))
+  (:require [solitaire-clojure.helper-functions :as helper]))
 
 
 (defn move-a-card-from-waste-to-foundations
@@ -45,10 +44,10 @@
                                 (< value no-final-test-needed-below)
 
                                 (and (>= (or (:value (last (foundations (mod (+ suit-number 1) 4)))) 0) (- value 2))
-                                     (card-in-tableau-face-up? tableau {:suit (mod (+ suit-number 3) 4) :value (- value 1) :face-up true}))
+                                     (helper/card-in-tableau-face-up? tableau {:suit (mod (+ suit-number 3) 4) :value (- value 1) :face-up true}))
 
                                 (and (>= (or (:value (last (foundations (mod (+ suit-number 3) 4)))) 0) (- value 2))
-                                     (card-in-tableau-face-up? tableau {:suit (mod (+ suit-number 1) 4) :value (- value 1) :face-up true}))
+                                     (helper/card-in-tableau-face-up? tableau {:suit (mod (+ suit-number 1) 4) :value (- value 1) :face-up true}))
 
                                 (and (>= (or (:value (last (foundations (mod (+ suit-number 1) 4)))) 0) (- value 2))
                                      (>= (or (:value (last (foundations (mod (+ suit-number 3) 4)))) 0) (- value 2)))))
@@ -57,7 +56,7 @@
                           new-foundations (assoc foundations suit-number new-foundation)
                           new-pile (vec (butlast pile))
                           new-pile (if (seq new-pile)
-                                     (force-last-card-pile-face-up new-pile)
+                                     (helper/force-last-card-pile-face-up new-pile)
                                      new-pile)
                           new-tableau (assoc tableau pile-num new-pile)
                           new-field (assoc field :foundations new-foundations :tableau new-tableau)
@@ -100,7 +99,7 @@
             :else
             (let [pile-last-card (last pile)]
               (if (and (:face-up pile-last-card) ;; last card in pile must be face up (probably unnecessary)
-                       (dif-color? pile-last-card waste-last-card)
+                       (helper/dif-color? pile-last-card waste-last-card)
                        (= (:value pile-last-card) (inc (:value waste-last-card))))
                 (let [new-pile (vec (conj pile waste-last-card))
                       new-tableau (assoc tableau pile-num new-pile)
