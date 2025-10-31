@@ -38,7 +38,7 @@
             (loop [deck-number (:first-deck-num config)
                    record-of-results {:lost-limit-reached 0 :lost-field-repeated 0 :won 0}] ; [cite: 71]
               (if (< deck-number (+ (:first-deck-num config) (:num-of-decks config)))
-                (let [initial-game-map (game/deal-next-deck) ; [cite: 72]
+                (let [initial-game-map (game/deal-next-deck)
 
                       ;; --- THIS IS "SOLUTION 2" FOR BATCH ---
                       _ (when (nil? initial-game-map)
@@ -53,36 +53,40 @@
                       updated-results
                       (cond
                         (= (:result result) :won)
-                        (update record-of-results :won inc) ; [cite: 74]
+                        (update record-of-results :won inc)
 
                         (= (:result result) :lost-limit-reached)
-                        (update record-of-results :lost-limit-reached inc) ; [cite: 75]
+                        (update record-of-results :lost-limit-reached inc)
 
                         (= (:result result) :lost-field-repeated)
-                        (update record-of-results :lost-field-repeated inc) ; [cite: 75-76]
+                        (update record-of-results :lost-field-repeated inc)
+                        ;
+                        ;
+                        (= (:result result) :lost-no-moves-possible)
+                        (update record-of-results :lost-no-moves-possible inc)
 
                         ;; :quit-by-user and :exit-program can't happen in batch mode
                         ;; but this is fine.
                         (= (:result result) :quit-by-user)
-                        (update record-of-results :quit-by-user (fnil inc 0)) ; [cite: 77]
+                        (update record-of-results :quit-by-user (fnil inc 0))
 
                         (= (:result result) :exit-program)
-                        record-of-results ; [cite: 77]
+                        record-of-results
 
                         :else
                         (do
-                          (println "Unexpected result:" result) ; [cite: 78]
-                          record-of-results))] ; [cite: 78]
+                          (println "Unexpected result:" result)
+                          record-of-results))]
 
                   (when (= (:result result) :won)
-                    (spit "decks-won-clojure.txt" (str "\nDeck number " deck-number " won.") :append true)) ; [cite: 78]
+                    (spit "decks-won-clojure.txt" (str "\nDeck number " deck-number " won.") :append true))
 
                   (if (= (:result result) :exit-program)
                     [deck-number updated-results]
-                    (recur (inc deck-number) updated-results))) ; [cite: 78-79]
+                    (recur (inc deck-number) updated-results)))
 
-                [deck-number record-of-results]))] ; [cite: 79]
+                [deck-number record-of-results]))]
 
-        (println "Record of Results:" final-results) ; [cite: 79]
+        (println "Record of Results:" final-results)
         (System/exit 0)) ; [cite: 79]
       )))
