@@ -17,13 +17,13 @@
     (do
       (println "Starting in interactive (UI) mode...")
       ;; Launch the UI window
-      (ui/launch-ui) ; [cite: 69]
+      (ui/launch-ui)
       ;; Deal the first deck and load it into the atom
       (let [initial-game-map (game/deal-next-deck)
 
             ;; --- ADDED NIL CHECK FOR INTERACTIVE ---
             _ (when (nil? initial-game-map)
-                (throw (Exception. (str "Ran out of decks. Check :first-deck-num in config."))))
+                (throw (Exception. (str "Failed to deal next deck; ran out of decks in csv file."))))
 
             initial-game-state (assoc initial-game-map :deck-number (:first-deck-num config))]
         (reset! game-state-atom initial-game-state)))

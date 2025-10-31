@@ -109,10 +109,11 @@
   "Describes the entire UI window"
   [{:keys [deck-number moves-made field game-result]}]
   (let [{:keys [stock foundations tableau waste]} field
-        game-is-over (not= :in-progress game-result)]
+        game-is-over? (not= :in-progress game-result)
+        no-more-decks? (= :no-more-decks game-result)]
     {:fx/type :stage
      :showing true
-     :title "Solitaire Monitor"
+     :title "Klondike Solitaire in Clojure"
      :width 800
      :height 900
      :on-close-request (fn [_] (System/exit 0))
@@ -129,17 +130,20 @@
                                                 {:fx/type :label
                                                  :text (str "Moves: " moves-made)} ;
 
-                                                (when game-is-over
+                                                (when game-is-over?
                                                   {:fx/type :label
                                                    :style {:-fx-font-weight :bold
                                                            :-fx-text-fill :red}
-                                                   :text (str "GAME " (clojure.string/upper-case (name game-result)))})
+                                                   :text (if no-more-decks?
+                                                           "NO MORE DECKS"
+                                                           (str "GAME " (clojure.string/upper-case (name game-result))))})
 
-                                                (button-view "Next Move" {:event/type :next-move} game-is-over) ;
-                                                (button-view "Back" {:event/type :back-one-move} game-is-over) ;
+
+                                                (button-view "Next Move" {:event/type :next-move} game-is-over?) ;
+                                                (button-view "Back" {:event/type :back-one-move} game-is-over?) ;
 
                                                 ;; --- 1. RENAMED & DISABLED ---
-                                                (button-view "Next Deck" {:event/type :next-deck} game-is-over) ;
+                                                (button-view "Next Deck" {:event/type :next-deck} no-more-decks?) ;
 
                                                 (button-view "Exit" {:event/type :exit-program} false)] ;
                                                (remove nil?)
