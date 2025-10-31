@@ -36,7 +36,10 @@
       (println (str "Starting in batch mode for " (:num-of-decks config) " decks..."))
       (let [[_ final-results]
             (loop [deck-number (:first-deck-num config)
-                   record-of-results {:lost-limit-reached 0 :lost-field-repeated 0 :won 0}] ; [cite: 71]
+                   record-of-results {:lost-limit-reached 0
+                                      :lost-field-repeated 0
+                                      :won 0
+                                      :lost-no-moves-possible 0}]
               (if (< deck-number (+ (:first-deck-num config) (:num-of-decks config)))
                 (let [initial-game-map (game/deal-next-deck)
 
