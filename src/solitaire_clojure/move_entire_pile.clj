@@ -94,5 +94,6 @@
             new-to-pile (vec (concat to-pile from-pile-up-cards))
             new-tableau (assoc tableau from-pile-num new-from-pile to-pile-num new-to-pile)
             new-field (assoc field :tableau new-tableau)
-            new-moves-made (inc moves-made)]
-        (assoc game-state :field new-field :moves-made new-moves-made)))))
+            new-moves-made (inc moves-made)
+            new-seen-fields (conj (:seen-fields game-state) new-field)]
+        (assoc game-state :field new-field :moves-made new-moves-made :seen-fields new-seen-fields)))))

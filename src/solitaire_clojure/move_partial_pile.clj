@@ -24,8 +24,9 @@
             new-to-pile (into to-pile cards-to-move-over)
             new-tableau (assoc tableau from-pile-num new-from-pile to-pile-num new-to-pile)
             new-field (assoc field :tableau new-tableau :foundations new-foundations)
-            new-moves-made (inc moves-made)]
-        (assoc game-state :field new-field :moves-made new-moves-made)))))
+            new-moves-made (inc moves-made)
+            new-seen-fields (conj (:seen-fields game-state) new-field)]
+        (assoc game-state :field new-field :moves-made new-moves-made :seen-fields new-seen-fields)))))
 
 
   (defn find-partial-move [tableau foundations]

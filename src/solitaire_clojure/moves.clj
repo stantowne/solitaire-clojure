@@ -20,8 +20,9 @@
                 new-foundations (assoc foundations suit-number new-foundation)
                 new-waste (vec (butlast waste))
                 new-field (assoc field :foundations new-foundations :waste new-waste)
-                new-moves-made (inc moves-made)]
-            (assoc game-state :field new-field :moves-made new-moves-made))
+                new-moves-made (inc moves-made)
+                new-seen-fields (conj (:seen-fields game-state) new-field)]
+            (assoc game-state :field new-field :moves-made new-moves-made :seen-fields new-seen-fields))
           nil)))))
 
 (defn move-a-card-from-pile-to-foundations
@@ -60,8 +61,9 @@
                                      new-pile)
                           new-tableau (assoc tableau pile-num new-pile)
                           new-field (assoc field :foundations new-foundations :tableau new-tableau)
-                          new-moves-made (inc moves-made)]
-                      (assoc game-state :field new-field :moves-made new-moves-made)))))))
+                          new-moves-made (inc moves-made)
+                          new-seen-fields (conj (:seen-fields game-state) new-field)]
+                      (assoc game-state :field new-field :moves-made new-moves-made :seen-fields new-seen-fields)))))))
     (range 7)))
 
 (defn move-a-card-from-waste-to-pile
@@ -76,36 +78,38 @@
       nil
       (some
         (fn [pile-num]
-         (let [pile (tableau pile-num)]
-          (cond
-            ;; move king to empty pile
-            (do
-              ;; (println "Testing empty pile for king move" pile-num)
-              ;; (println "Waste last card:" waste-last-card "Value:" (:value waste-last-card))
-              ;; (println "Pile Number:" pile-num "Pile:" pile)
-              (and (empty? pile) (= (:value waste-last-card) 13)))
-            (let [new-pile (vec (conj pile waste-last-card)) ; no need to force face up, waste cards are always face up
-                  new-tableau (assoc tableau pile-num new-pile)
-                  new-waste (vec (butlast waste))
-                  new-field (assoc field :tableau new-tableau :waste new-waste)
-                  new-moves-made (inc moves-made)]
-              (assoc game-state :field new-field :moves-made new-moves-made))
+          (let [pile (tableau pile-num)]
+            (cond
+              ;; move king to empty pile
+              (do
+                ;; (println "Testing empty pile for king move" pile-num)
+                ;; (println "Waste last card:" waste-last-card "Value:" (:value waste-last-card))
+                ;; (println "Pile Number:" pile-num "Pile:" pile)
+                (and (empty? pile) (= (:value waste-last-card) 13)))
+              (let [new-pile (vec (conj pile waste-last-card)) ; no need to force face up, waste cards are always face up
+                    new-tableau (assoc tableau pile-num new-pile)
+                    new-waste (vec (butlast waste))
+                    new-field (assoc field :tableau new-tableau :waste new-waste)
+                    new-moves-made (inc moves-made)
+                    new-seen-fields (conj (:seen-fields game-state) new-field)]
+                (assoc game-state :field new-field :moves-made new-moves-made :seen-fields new-seen-fields))
 
-            ;; empty pile but last waste card isn't a king
-            (empty? pile)
-            nil
+              ;; empty pile but last waste card isn't a king
+              (empty? pile)
+              nil
 
-            ;; non-empty pile (regular case)
-            :else
-            (let [pile-last-card (last pile)]
-              (if (and (:face-up pile-last-card) ;; last card in pile must be face up (probably unnecessary)
-                       (helper/dif-color? pile-last-card waste-last-card)
-                       (= (:value pile-last-card) (inc (:value waste-last-card))))
-                (let [new-pile (vec (conj pile waste-last-card))
-                      new-tableau (assoc tableau pile-num new-pile)
-                      new-waste (vec (butlast waste))
-                      new-field (assoc field :tableau new-tableau :waste new-waste)
-                      new-moves-made (inc (:moves-made game-state))]
-                  (assoc game-state :field new-field :moves-made new-moves-made)))))))
+              ;; non-empty pile (regular case)
+              :else
+              (let [pile-last-card (last pile)]
+                (if (and (:face-up pile-last-card) ;; last card in pile must be face up (probably unnecessary)
+                         (helper/dif-color? pile-last-card waste-last-card)
+                         (= (:value pile-last-card) (inc (:value waste-last-card))))
+                  (let [new-pile (vec (conj pile waste-last-card))
+                        new-tableau (assoc tableau pile-num new-pile)
+                        new-waste (vec (butlast waste))
+                        new-field (assoc field :tableau new-tableau :waste new-waste)
+                        new-moves-made (inc (:moves-made game-state))
+                        new-seen-fields (conj (:seen-fields game-state) new-field)]
+                    (assoc game-state :field new-field :moves-made new-moves-made :seen-fields new-seen-fields)))))))
         (range 7)))))
 

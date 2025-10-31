@@ -107,10 +107,18 @@
 ;; --- UPDATED: THE ROOT LAYOUT ---
 (defn root-view
   "Describes the entire UI window"
-  [{:keys [deck-number moves-made field game-result]}]
+  [{:keys [deck-number moves-made field game-result seen-fields]}]
   (let [{:keys [stock foundations tableau waste]} field
         game-is-over? (not= :in-progress game-result)
-        no-more-decks? (= :no-more-decks game-result)]
+        no-more-decks? (= :no-more-decks game-result)
+        cant-go-back? (< (count seen-fields) 2)
+        status-text (case game-result
+                      :won "Game Won"
+                      :lost-limit-reached "Game Lost (limit reached)"
+                      :lost-field-repeated "Game Lost (field repeated)"
+                      :lost-no-moves-possible "Game Lost (no moves possible)"
+                      :no-more-decks "No More Decks"
+                      "")] ; Default to an empty string
     {:fx/type :stage
      :showing true
      :title "Klondike Solitaire in Clojure"
@@ -124,6 +132,7 @@
                     :children [
                                {:fx/type :v-box
                                 :spacing 10
+                                :pref-width 100
                                 :children (->> [
                                                 {:fx/type :label
                                                  :text (str "Deck: " deck-number)} ;
@@ -134,17 +143,13 @@
                                                   {:fx/type :label
                                                    :style {:-fx-font-weight :bold
                                                            :-fx-text-fill :red}
-                                                   :text (if no-more-decks?
-                                                           "NO MORE DECKS"
-                                                           (str "GAME " (clojure.string/upper-case (name game-result))))})
+                                                   :text status-text
+                                                   :wrap-text true})
 
 
                                                 (button-view "Next Move" {:event/type :next-move} game-is-over?) ;
-                                                (button-view "Back" {:event/type :back-one-move} game-is-over?) ;
-
-                                                ;; --- 1. RENAMED & DISABLED ---
+                                                (button-view "Back" {:event/type :back-one-move} cant-go-back?) ;
                                                 (button-view "Next Deck" {:event/type :next-deck} no-more-decks?) ;
-
                                                 (button-view "Exit" {:event/type :exit-program} false)] ;
                                                (remove nil?)
                                                (vec))}
