@@ -55,8 +55,8 @@
   ([current-state]
      (let [movers [#(moves/move-a-card-from-pile-to-foundations % 2 13)
                   #(moves/move-a-card-from-waste-to-foundations % 2)
-                  moves/move-a-card-from-waste-to-pile
                   entire-pile/move-entire-pile
+                  moves/move-a-card-from-waste-to-pile
                   partial-pile/move-partial-pile
                   #(moves/move-a-card-from-pile-to-foundations % 13 9)
                   #(moves/move-a-card-from-waste-to-foundations % 13)
