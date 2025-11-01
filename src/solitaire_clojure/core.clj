@@ -43,12 +43,11 @@
               (if (< deck-number (+ (:first-deck-num config) (:num-of-decks config)))
                 (let [initial-game-map (game/deal-next-deck)
 
-                      ;; --- THIS IS "SOLUTION 2" FOR BATCH ---
                       _ (when (nil? initial-game-map)
                           (throw (Exception. (str "Ran out of decks. Deck limit: " (:num-of-decks config)))))
 
                       initial-game-state (assoc initial-game-map :deck-number deck-number)
-                      _ (reset! game-state-atom initial-game-state)
+                      _ (reset! game-state-atom initial-game-state) ;load the new-game-state into the atom
 
                       ;; Call the non-interactive, fast "play-game"
                       result (game/play-game)
@@ -56,33 +55,42 @@
                       updated-results
                       (cond
                         (= (:result result) :won)
-                        (update record-of-results :won inc)
+                        (do
+                          (when (:logging-mode? config)
+                            (spit "deck-by-deck-results.txt" (str "\nDeck number " deck-number " won!") :append true))
+                          (update record-of-results :won inc))
 
                         (= (:result result) :lost-limit-reached)
-                        (update record-of-results :lost-limit-reached inc)
+                        (do
+                          (when (:logging-mode? config)
+                            (spit "deck-by-deck-results.txt" (str "\nDeck number " deck-number " lost: limit reached.") :append true))
+                          (update record-of-results :lost-limit-reached inc))
 
                         (= (:result result) :lost-field-repeated)
-                        (update record-of-results :lost-field-repeated inc)
-                        ;
-                        ;
-                        (= (:result result) :lost-no-moves-possible)
-                        (update record-of-results :lost-no-moves-possible inc)
+                        (do
+                          (when (:logging-mode? config)
+                            (spit "deck-by-deck-results.txt" (str "\nDeck number " deck-number " lost: field repeated.") :append true))
+                          (update record-of-results :lost-field-repeated inc))
 
-                        ;; :quit-by-user and :exit-program can't happen in batch mode
-                        ;; but this is fine.
+                        (= (:result result) :lost-no-moves-possible)
+                        (do
+                          (when (:logging-mode? config)
+                            (spit "deck-by-deck-results.txt" (str "\nDeck number " deck-number " lost: no moves possible.") :append true))
+                          (update record-of-results :lost-no-moves-possible inc))
+
+                        ;; residue from when play-game included move by move control at the command line
                         (= (:result result) :quit-by-user)
                         (update record-of-results :quit-by-user (fnil inc 0))
 
+                        ;; same as above
                         (= (:result result) :exit-program)
                         record-of-results
 
+                        ;; should not happen
                         :else
                         (do
                           (println "Unexpected result:" result)
                           record-of-results))]
-
-                  (when (= (:result result) :won)
-                    (spit "decks-won-clojure.txt" (str "\nDeck number " deck-number " won.") :append true))
 
                   (if (= (:result result) :exit-program)
                     [deck-number updated-results]
