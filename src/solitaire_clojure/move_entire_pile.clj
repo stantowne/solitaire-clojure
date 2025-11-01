@@ -73,7 +73,7 @@
   "returns a new map with all the face-up cards of a tableau pile moved to a different tableau pile,
   in certain cases; otherwise return nil"
   [game-state]
-  (let [{:keys [field moves-made]} game-state
+  (let [{:keys [field moves-made seen-fields]} game-state
         tableau (:tableau field)
         waste (:waste field)
         legal-moves (legal-moves tableau)
@@ -95,5 +95,5 @@
             new-tableau (assoc tableau from-pile-num new-from-pile to-pile-num new-to-pile)
             new-field (assoc field :tableau new-tableau)
             new-moves-made (inc moves-made)
-            new-seen-fields (conj (:seen-fields game-state) new-field)]
+            new-seen-fields (conj seen-fields new-field)]
         (assoc game-state :field new-field :moves-made new-moves-made :seen-fields new-seen-fields)))))

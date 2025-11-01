@@ -6,7 +6,7 @@
   "returns a new map with the last card in the waste moved to the foundations in certain cases;
   otherwise returns nil"
   [game-state max-value-to-move]
-  (let [{:keys [field moves-made]} game-state
+  (let [{:keys [field moves-made seen-fields]} game-state
         waste (:waste field)
         foundations (:foundations field)]
     (if (empty? waste)
@@ -21,7 +21,7 @@
                 new-waste (vec (butlast waste))
                 new-field (assoc field :foundations new-foundations :waste new-waste)
                 new-moves-made (inc moves-made)
-                new-seen-fields (conj (:seen-fields game-state) new-field)]
+                new-seen-fields (conj seen-fields new-field)]
             (assoc game-state :field new-field :moves-made new-moves-made :seen-fields new-seen-fields))
           nil)))))
 
@@ -30,7 +30,7 @@
   otherwise return nil"
   [game-state do-not-move-above no-final-test-needed-below]
   (some (fn [pile-num]
-          (let [{:keys [field moves-made]} game-state
+          (let [{:keys [field moves-made seen-fields]} game-state
                 tableau (:tableau field)
                 foundations (:foundations field)
                 pile (tableau pile-num)]
@@ -62,7 +62,7 @@
                           new-tableau (assoc tableau pile-num new-pile)
                           new-field (assoc field :foundations new-foundations :tableau new-tableau)
                           new-moves-made (inc moves-made)
-                          new-seen-fields (conj (:seen-fields game-state) new-field)]
+                          new-seen-fields (conj seen-fields new-field)]
                       (assoc game-state :field new-field :moves-made new-moves-made :seen-fields new-seen-fields)))))))
     (range 7)))
 
@@ -70,7 +70,7 @@
   "returns a new map with the last card in the waste moved to a tableau pile in certain cases;
   otherwise return"
   [game-state]
-  (let [{:keys [field moves-made]} game-state
+  (let [{:keys [field moves-made seen-fields]} game-state
         waste (:waste field)
         waste-last-card (last waste)
         tableau (:tableau field)]
@@ -91,7 +91,7 @@
                     new-waste (vec (butlast waste))
                     new-field (assoc field :tableau new-tableau :waste new-waste)
                     new-moves-made (inc moves-made)
-                    new-seen-fields (conj (:seen-fields game-state) new-field)]
+                    new-seen-fields (conj seen-fields new-field)]
                 (assoc game-state :field new-field :moves-made new-moves-made :seen-fields new-seen-fields))
 
               ;; empty pile but last waste card isn't a king
@@ -109,7 +109,7 @@
                         new-waste (vec (butlast waste))
                         new-field (assoc field :tableau new-tableau :waste new-waste)
                         new-moves-made (inc (:moves-made game-state))
-                        new-seen-fields (conj (:seen-fields game-state) new-field)]
+                        new-seen-fields (conj seen-fields new-field)]
                     (assoc game-state :field new-field :moves-made new-moves-made :seen-fields new-seen-fields)))))))
         (range 7)))))
 

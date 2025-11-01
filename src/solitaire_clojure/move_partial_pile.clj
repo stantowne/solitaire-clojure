@@ -9,7 +9,7 @@
   and (2) the immediately preceding face up card from the from-pile moved up to the foundations, in certain cases;
   otherwise return nil"
   [game-state]
-  (let [{:keys [field moves-made]} game-state
+  (let [{:keys [field moves-made seen-fields]} game-state
         tableau (:tableau field)
         foundations (:foundations field)
         partial-move (find-partial-move tableau foundations)
@@ -25,7 +25,7 @@
             new-tableau (assoc tableau from-pile-num new-from-pile to-pile-num new-to-pile)
             new-field (assoc field :tableau new-tableau :foundations new-foundations)
             new-moves-made (inc moves-made)
-            new-seen-fields (conj (:seen-fields game-state) new-field)]
+            new-seen-fields (conj seen-fields new-field)]
         (assoc game-state :field new-field :moves-made new-moves-made :seen-fields new-seen-fields)))))
 
 
