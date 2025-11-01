@@ -8,7 +8,7 @@
   this is the only function which never returns nil
   it is the innermost function in the if-let group"
   [game-state]
-  (let [{:keys [field moves-made]} game-state
+  (let [{:keys [field moves-made seen-fields]} game-state
         waste (:waste field)
         stock (:stock field)
         stock-count (count stock)
@@ -23,7 +23,7 @@
             new-waste []
             new-field (assoc field :stock new-stock :waste new-waste)
             new-moves-made (inc moves-made)
-            new-seen-fields (conj (:seen-fields game-state) new-field)]
+            new-seen-fields (conj seen-fields new-field)]
         (assoc game-state :field new-field :moves-made new-moves-made :seen-fields new-seen-fields))
 
       (> stock-count 2) ;; three or more cards in stock
@@ -31,13 +31,13 @@
             new-waste (vec (concat waste (map helper/force-card-face-up (reverse (subvec stock (- stock-count 3) stock-count)))))
             new-field (assoc field :stock new-stock :waste new-waste)
             new-moves-made (inc moves-made)
-            new-seen-fields (conj (:seen-fields game-state) new-field)]
-        (assoc game-state :field new-field :moves-made new-moves-made :new-seen-fields new-seen-fields))
+            new-seen-fields (conj seen-fields new-field)]
+        (assoc game-state :field new-field :moves-made new-moves-made :seen-fields new-seen-fields))
 
       :else ;; only 1 or 2 cards in stock
       (let [new-stock []
             new-waste (vec (concat waste (map helper/force-card-face-up (reverse stock))))
             new-field (assoc field :stock new-stock :waste new-waste)
             new-moves-made (inc moves-made)
-            new-seen-fields (conj (:seen-fields game-state) new-field)]
+            new-seen-fields (conj seen-fields new-field)]
         (assoc game-state :field new-field :moves-made new-moves-made :seen-fields new-seen-fields)))))
