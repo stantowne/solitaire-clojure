@@ -2,8 +2,7 @@
   (:gen-class)
   (:require [solitaire-clojure.config :refer [config]]
             [solitaire-clojure.state :refer [game-state-atom]]
-            [solitaire-clojure.logic :as game]
-            [solitaire-clojure.ui :as ui]))
+            [solitaire-clojure.logic :as game]))
 
 (defn -main
   "Main entry point for the Solitaire game"
@@ -16,19 +15,20 @@
     ;; --- PATH 1: INTERACTIVE UI MODE ---
     (do
       (println "Starting in interactive (UI) mode...")
-      ;; Launch the UI window
-      (ui/launch-ui)
-      ;; Deal the first deck and load it into the atom
+      ;; 2.  Deal the first deck and load it into the atom FIRST
       (let [initial-game-map (game/deal-next-deck)
-
-            ;; --- ADDED NIL CHECK FOR INTERACTIVE ---
             _ (when (nil? initial-game-map)
-                (throw (Exception. (str "Failed to deal next deck; ran out of decks in csv file."))))
+                (throw (Exception.
+                  (str "Failed to deal next deck; ran out of decks in csv file."))))
 
             initial-game-state (assoc initial-game-map :deck-number (:first-deck-num config))]
-        (reset! game-state-atom initial-game-state)))
-    ;; The main thread ends here, but the UI thread is alive.
-    ;; System/exit will be called by the UI's "Exit" button or window close.
+        (reset! game-state-atom initial-game-state))
+    ;; 3. Now, load and launch the UI at RUNTIME using requiring-resolve
+    (let [launch-fn (requiring-resolve 'solitaire-clojure.ui/launch-ui)]
+      (launch-fn))
+
+    ;; 4. Keep the main thread alive so the UI thread can run
+    (Thread/sleep Long/MAX_VALUE))
 
 
     ;; --- PATH 2: BATCH MODE ---
@@ -101,3 +101,4 @@
         (println "Record of Results:" final-results)
         (System/exit 0)) ; [cite: 79]
       )))
+

@@ -100,9 +100,8 @@
   (when (:print-each-move? config)
     (print-game-state @game-state-atom)))
 
-  ;; After any event, print the new state to the console
-  (when (:print-each-move? config)
-    (print-game-state @game-state-atom))
+
+
 
 ;; --- UPDATED: THE ROOT LAYOUT ---
 (defn root-view
@@ -192,13 +191,14 @@
 
 ;; --- UPDATED: THE RENDERER (to handle events) ---
 (def renderer
-  (fx/create-renderer
-    ;; 1. The :middleware tells cljfx to use root-view as the blueprint
-    :middleware (fx/wrap-map-desc root-view)
+  (delay
+    (fx/create-renderer
+      ;; 1. The :middleware tells cljfx to use root-view as the blueprint
+      :middleware (fx/wrap-map-desc root-view)
 
-    ;; 2. The :opts map is where you tell cljfx which function handles events
-    :opts {:fx.opt/map-event-handler event-handler}))
+      ;; 2. The :opts map is where you tell cljfx which function handles events
+      :opts {:fx.opt/map-event-handler event-handler})))
 
 ;; --- UPDATED: THE LAUNCHER (to use new renderer) ---
 (defn launch-ui []
-  (fx/mount-renderer game-state-atom renderer))
+  (fx/mount-renderer game-state-atom @renderer))

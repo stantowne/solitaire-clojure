@@ -1,4 +1,6 @@
-(ns solitaire-clojure.print)
+(ns solitaire-clojure.print
+  (:require [clojure.string :as str]))
+
 
 (comment
 (defn suit-str
@@ -64,11 +66,6 @@
   (println "---------------------"))
   ;; (read-line)
   )
-
-
-
-(require '[clojure.string :as str])
-
 
 
 (defn print-tableau
