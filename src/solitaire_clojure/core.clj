@@ -24,11 +24,11 @@
             initial-game-state (assoc initial-game-map :deck-number (:first-deck-num config))]
         (reset! game-state-atom initial-game-state))
     ;; 3. Now, load and launch the UI at RUNTIME using requiring-resolve
-    (let [launch-fn (requiring-resolve 'solitaire-clojure.ui/launch-ui)]
-      (launch-fn))
+      (let [launch-fn (requiring-resolve 'solitaire-clojure.ui/launch-ui)]
+        (launch-fn))
 
     ;; 4. Keep the main thread alive so the UI thread can run
-    (Thread/sleep Long/MAX_VALUE))
+      (Thread/sleep Long/MAX_VALUE))
 
 
     ;; --- PATH 2: BATCH MODE ---
