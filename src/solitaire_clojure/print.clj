@@ -41,7 +41,7 @@
   (str
     (value-str (:value card))
     (suit-str (:suit card))
-    (if (:face-up card) "Up" "Dn")))
+    (if (:face-up card) "up" "dn")))
 
 (defn print-game-state
   "Prints the current game state"
