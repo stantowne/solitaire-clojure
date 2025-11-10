@@ -2,6 +2,7 @@
  :first-deck-num     18 ; files are treated as 0 base
  :num-of-decks       100 ;; do not exceed number of decks in file minus first-deck-num
  :move-limit         200
- :print-each-move?   true
- :interactive-mode?  true
- :logging-mode?      false}
+ :print-each-move?   false
+ :interactive-mode?  false
+ :log-deck-by-deck-results? false
+ :log-wins?                 true}

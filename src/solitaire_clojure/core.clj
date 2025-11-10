@@ -58,25 +58,27 @@
                       (cond
                         (= (:result result) :won)
                         (do
-                          (when (:logging-mode? config)
-                            (spit "deck-by-deck-results.txt" (str "\nDeck number " deck-number " won!") :append true))
+                          (when (:log-deck-by-deck-results? config)
+                            (spit "deck-by-deck-results.txt" (str "Deck number " deck-number " won!\n") :append true))
+                          (when (:log-wins? config)
+                            (spit "decks-won-clojure.txt" (str deck-number "\n") :append true))
                           (update record-of-results :won inc))
 
                         (= (:result result) :lost-limit-reached)
                         (do
-                          (when (:logging-mode? config)
-                            (spit "deck-by-deck-results.txt" (str "\nDeck number " deck-number " lost: limit reached.") :append true))
+                          (when (:log-deck-by-deck-results? config)
+                            (spit "deck-by-deck-results.txt" (str "Deck number " deck-number " lost: limit reached.\n") :append true))
                           (update record-of-results :lost-limit-reached inc))
 
                         (= (:result result) :lost-field-repeated)
                         (do
-                          (when (:logging-mode? config)
-                            (spit "deck-by-deck-results.txt" (str "\nDeck number " deck-number " lost: field repeated.") :append true))
+                          (when (:log-deck-by-deck-results? config)
+                            (spit "deck-by-deck-results.txt" (str "Deck number " deck-number " lost: field repeated.\n") :append true))
                           (update record-of-results :lost-field-repeated inc))
 
                         (= (:result result) :lost-no-moves-possible)
                         (do
-                          (when (:logging-mode? config)
+                          (when (:log-deck-by-deck-results? config)
                             (spit "deck-by-deck-results.txt" (str "\nDeck number " deck-number " lost: no moves possible.") :append true))
                           (update record-of-results :lost-no-moves-possible inc))
 
