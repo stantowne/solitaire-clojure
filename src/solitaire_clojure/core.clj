@@ -32,7 +32,9 @@
 
 
     ;; --- PATH 2: BATCH MODE ---
-    (do
+
+    (time
+      (do
       (println (str "Starting in batch mode for " (:num-of-decks config) " decks..."))
       (let [[_ final-results]
             (loop [deck-number (:first-deck-num config)
@@ -99,6 +101,6 @@
                 [deck-number record-of-results]))]
 
         (println "Record of Results:" final-results)
-        (System/exit 0)) ; [cite: 79]
-      )))
+        ) ; [cite: 79]
+      )))(System/exit 0))
 
