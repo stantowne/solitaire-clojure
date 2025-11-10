@@ -58,7 +58,7 @@
                   entire-pile/move-entire-pile
                   moves/move-a-card-from-waste-to-pile
                   partial-pile/move-partial-pile
-                  #(moves/move-a-card-from-pile-to-foundations % 13 9)
+                  #(moves/move-a-card-from-pile-to-foundations % 13 7)
                   #(moves/move-a-card-from-waste-to-foundations % 13)
                   flip/flip]
          new-state (or (some #(% current-state) movers) current-state)]
