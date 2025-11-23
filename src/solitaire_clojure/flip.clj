@@ -1,5 +1,8 @@
 (ns solitaire-clojure.flip
-  (:require [solitaire-clojure.helper-functions :as helper]))
+  (:require [solitaire-clojure.helper-functions :as helper]
+            [solitaire-clojure.types :as t])
+  ;; ADD THIS IMPORT:
+  (:import [solitaire_clojure.types GameState Field]))
 
 
 (defn flip
@@ -7,10 +10,13 @@
   if both stock and waste are empty returns the same map as was passed in
   this is the only function which never returns nil
   it is the innermost function in the if-let group"
-  [game-state]
-  (let [{:keys [field moves-made seen-fields]} game-state
-        waste (:waste field)
-        stock (:stock field)
+  ;; USE IMPORTED CLASS NAME HERE:
+  [^GameState game-state]
+  (let [^Field field (.-field game-state)
+        moves-made (.-moves-made game-state)
+        seen-fields (.-seen-fields game-state)
+        waste (.-waste field)
+        stock (.-stock field)
         stock-count (count stock)
         waste-count (count waste)]
 

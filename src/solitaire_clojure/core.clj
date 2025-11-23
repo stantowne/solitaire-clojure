@@ -7,7 +7,8 @@
 (defn -main
   "Main entry point for the Solitaire game"
   []
-  ;; 1. Initialize the CSV reader once for both modes
+  ;; Initialize the CSV reader once for both modes
+  ;; init-csv-reader drops the first N decks as specified in config
   (game/init-csv-reader (:decks-filepath config) (:first-deck-num config))
 
   (if (:interactive-mode? config)
@@ -16,7 +17,7 @@
     (do
       (println "Starting in interactive (UI) mode...")
       ;; 2.  Deal the first deck and load it into the atom FIRST
-      (let [initial-game-map (game/deal-next-deck)
+      (let [initial-game-map (game/deal-next-deck (:first-deck-num config))
             _ (when (nil? initial-game-map)
                 (throw (Exception.
                   (str "Failed to deal next deck; ran out of decks in csv file."))))
@@ -35,7 +36,7 @@
 
     (time
       (do
-      (println (str "Starting in batch mode for " (:num-of-decks config) " decks..."))
+      (println (str "Starting in batch mode for " (:num-of-decks config) " decks starting with deck " (:first-deck-num config) "..."))
       (let [[_ final-results]
             (loop [deck-number (:first-deck-num config)
                    record-of-results {:lost-limit-reached 0
@@ -43,13 +44,15 @@
                                       :won 0
                                       :lost-no-moves-possible 0}]
               (if (< deck-number (+ (:first-deck-num config) (:num-of-decks config)))
-                (let [initial-game-map (game/deal-next-deck)
+                (let [initial-game-map (game/deal-next-deck deck-number)
+
+                      _ (when (zero? (mod deck-number 2000))
+                          (println (str "Processing Deck: " deck-number "...")))
 
                       _ (when (nil? initial-game-map)
                           (throw (Exception. (str "Ran out of decks. Deck limit: " (:num-of-decks config)))))
 
-                      initial-game-state (assoc initial-game-map :deck-number deck-number)
-                      _ (reset! game-state-atom initial-game-state) ;load the new-game-state into the atom
+                      _ (reset! game-state-atom initial-game-map) ;load the game-state-map into the atom
 
                       ;; Call the non-interactive, fast "play-game"
                       result (game/play-game)
@@ -103,6 +106,6 @@
                 [deck-number record-of-results]))]
 
         (println "Record of Results:" final-results)
-        ) ; [cite: 79]
+        )
       )))(System/exit 0))
 

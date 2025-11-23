@@ -86,9 +86,9 @@
           deck-limit (+ (:first-deck-num config) (:num-of-decks config))] ;
       (if (< next-deck-num deck-limit)
         ;; We have more decks to play
-        (let [next-deck (game/deal-next-deck)] ;
-          (if next-deck
-            (reset! game-state-atom (assoc next-deck :deck-number next-deck-num)) ;
+        (let [next-game-state (game/deal-next-deck next-deck-num)] ;
+          (if next-game-state
+            (reset! game-state-atom next-game-state) ;
             ;; Ran out of decks in the CSV file
             (swap! game-state-atom assoc :game-result :no-more-decks))) ;
         ;; Reached the configured deck limit

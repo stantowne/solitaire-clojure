@@ -1,6 +1,6 @@
 {:decks-filepath     "decks-made-2022-01-15-count-10000-dict.csv"
- :first-deck-num     18 ; files are treated as 0 base
- :num-of-decks       100 ;; do not exceed number of decks in file minus first-deck-num
+ :first-deck-num     0 ; files are treated as 0 base
+ :num-of-decks       10000 ;; do not exceed number of decks in file minus first-deck-num
  :move-limit         200
  :print-each-move?   false
  :interactive-mode?  false

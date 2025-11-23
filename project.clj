@@ -26,5 +26,6 @@
                  [org.openjfx/javafx-controls "21.0.2" :classifier "mac-aarch64"] ; For M1/M2
                  ]
   :repl-options {:init-ns solitaire-clojure.core}
+  :global-vars {*warn-on-reflection* true}
   :main solitaire-clojure.core
   :profiles {:uberjar {:aot [solitaire-clojure.core]}})
